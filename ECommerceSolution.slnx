@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/ApplicationCoreLayer/">
+    <Project Path="ECommerce.Domain/ECommerce.Domain.csproj" />
+    <Project Path="ECommerce.Service/ECommerce.Services.csproj" />
+    <Project Path="ECommerce.Services.Abstraction/ECommerce.Services.Abstraction.csproj" />
+  </Folder>
+  <Folder Name="/Drawings/">
+    <File Path="drawing.excalidraw1.excalidraw.png" />
+  </Folder>
+  <Folder Name="/Infrastructure Layer/">
+    <Project Path="ECommerce.Persistence/ECommerce.Persistence.csproj" />
+  </Folder>
+  <Folder Name="/PresentationLayer/">
+    <Project Path="ECommerce.Presentation/ECommerce.Presentation.csproj" />
+    <Project Path="ECommerce.Web/ECommerce.Web.csproj" />
+  </Folder>
+  <Project Path="ECommerce.SharedLibirary/ECommerce.SharedLibirary.csproj" />
+</Solution>
