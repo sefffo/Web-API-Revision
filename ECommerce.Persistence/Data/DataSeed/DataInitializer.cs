@@ -13,31 +13,31 @@ namespace ECommerce.Persistence.Data.DataSeed
 {
     public class DataInitializer(ApplicationDbContext context) : IDataInitializer
     {
-        public void Initialize()
+        public async Task Initialize()
         {
             try
             {
-                var hasProducts = context.Products.Any();
-                var hasBrands = context.ProductBrands.Any();
-                var hasTypes = context.ProductTypes.Any();
+                var hasProducts = await context.Products.AnyAsync();
+                var hasBrands = await context.ProductBrands.AnyAsync();
+                var hasTypes = await context.ProductTypes.AnyAsync();
                 if (hasProducts && hasBrands && hasTypes) return;
 
                 if (!hasBrands)
                 {
-                    SeedDataFromJson<ProductBrand, int>("brands.json", context.ProductBrands);
+                    await SeedDataFromJson<ProductBrand, int>("brands.json", context.ProductBrands);
 
                 }
                 if (!hasTypes)
                 {
-                    SeedDataFromJson<ProductType, int>("types.json", context.ProductTypes);
+                    await SeedDataFromJson<ProductType, int>("types.json", context.ProductTypes);
 
-                    context.SaveChanges(); //products depend on brands and types, so we need to save them first before seeding products
+                    await context.SaveChangesAsync(); //products depend on brands and types, so we need to save them first before seeding products
                 }
                 if (!hasProducts)
                 {
 
-                    SeedDataFromJson<Product, int>("products.json", context.Products);
-                    context.SaveChanges(); // Save changes after seeding products
+                    await SeedDataFromJson<Product, int>("products.json", context.Products);
+                    await context.SaveChangesAsync(); // Save changes after seeding products
 
                 }
 
@@ -62,13 +62,12 @@ namespace ECommerce.Persistence.Data.DataSeed
                 //var data = File.ReadAllText(filePath); ==> bad practise for large files
 
                 using var stream = File.OpenRead(filePath);
-                var entities = JsonSerializer.DeserializeAsync<List<TEntity>>(stream, new JsonSerializerOptions() //3shan lw el data feha capital or small letters w 3shan lw feha camelCase aw pascalCase
-                { PropertyNameCaseInsensitive = true }
-                    ).Result;
+                var data = await JsonSerializer.DeserializeAsync<List<TEntity>>(stream, new JsonSerializerOptions() //3shan lw el data feha capital or small letters w 3shan lw feha camelCase aw pascalCase
+                { PropertyNameCaseInsensitive = true });
 
-                if (entities == null) return;
+                if (data == null) return;
 
-                 await dbset.AddRangeAsync(entities);
+                 await dbset.AddRangeAsync(data);
             }
             catch(Exception ex) 
             {

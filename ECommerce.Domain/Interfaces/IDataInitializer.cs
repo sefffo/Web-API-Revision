@@ -6,6 +6,6 @@ namespace ECommerce.Domain.Interfaces
 {
     public interface IDataInitializer
     {
-        public void Initialize();
+        public Task Initialize();
     }
 }

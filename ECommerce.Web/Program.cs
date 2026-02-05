@@ -4,12 +4,13 @@ using ECommerce.Persistence.Data.DataSeed;
 using ECommerce.Persistence.Data.DbContexts;
 using ECommerce.Web.Extensions;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace ECommerce.Web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -47,9 +48,9 @@ namespace ECommerce.Web
             //open closed principle: we can add new functionality without modifying the existing code, we just need to create new extension methods for the new functionality and call them in the program.cs file
             //by adding any extention method we can enhance the WebApplication class without modifying its source code 
 
-            app.MigrateDatabase();
+            await app.MigrateDatabaseAsync();
 
-            app.SeedData();
+            await app.SeedDataAsync();
 
             #endregion
 
