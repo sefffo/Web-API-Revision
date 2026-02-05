@@ -1,9 +1,14 @@
-
+using AutoMapper;
 using ECommerce.Domain.Interfaces;
 using ECommerce.Persistence.Data.DataSeed;
 using ECommerce.Persistence.Data.DbContexts;
+using ECommerce.Persistence.Repositories;
+using ECommerce.Services.Abstraction;
+using ECommerce.Services.MappingProfiles;
+using ECommerce.Services.Servicies;
 using ECommerce.Web.Extensions;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace ECommerce.Web
@@ -17,6 +22,33 @@ namespace ECommerce.Web
 
 
             #region Registers
+
+
+           
+
+
+            builder.Services.AddScoped<IProductServivce, ProductService>();
+
+
+
+            //builder.Services.AddAutoMapper(x=>x.LicenseKey="",typeof(ProductPictureUrlResolver).Assembly);//registering the assembly where the resolver is located
+            builder.Services.AddAutoMapper(typeof(ProductPictureUrlResolver).Assembly);
+            builder.Services.AddTransient<ProductPictureUrlResolver>();
+
+            //registering the resolver as transient because it does not maintain any state and is lightweight
+            //whats the use of transient?
+            //it creates a new instance of the service each time it is requested
+            //this is useful for lightweight, stateless services
+            builder.Services.AddAutoMapper(mp=>mp
+            .AddProfile<ProductProfile>()
+            );
+
+
+
+
+
+
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             builder.Services.AddScoped<IDataInitializer, DataInitializer>();
 
@@ -38,7 +70,7 @@ namespace ECommerce.Web
             {
                 app.MapOpenApi();
             }
-
+ 
 
 
 
@@ -54,7 +86,12 @@ namespace ECommerce.Web
 
             #endregion
 
+
+
             app.UseHttpsRedirection();
+
+            app.MapStaticAssets();
+
 
             app.UseAuthorization();
 
