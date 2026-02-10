@@ -22,10 +22,10 @@ namespace ECommerce.Services.Servicies
             return mappedBrands;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
+        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync(int ? brandId , int ? typeId)
         {
             var repo = unitOfWork.GetRepository<Product, int>();
-            var spec = new ProductWithBrandAndTypeSpecification();
+            var spec = new ProductWithBrandAndTypeSpecification(brandId ,typeId);
             var Products = await repo.GetAllAsync(spec);
             //mapp from Brand Entity to the dto BrandDto
             var mappedProducts = mapper.Map<IEnumerable<ProductDto>>(Products);
