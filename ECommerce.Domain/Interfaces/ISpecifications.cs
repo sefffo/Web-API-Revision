@@ -9,7 +9,9 @@ namespace ECommerce.Domain.Interfaces
 {
     public interface ISpecifications<TEntity, Tkey> where TEntity : BaseEntity<Tkey>
     {
-        public ICollection<Expression<Func<TEntity, object>>> IncludeEcplressions { get; }
+        public ICollection<Expression<Func<TEntity, object>>> IncludeExplressions { get; }
+
+        public Expression<Func<TEntity, bool>> Criteria { get; }
 
 
 

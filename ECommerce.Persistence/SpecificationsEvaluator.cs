@@ -1,4 +1,4 @@
-﻿using ECommerce.Domain.Entities;
+﻿ using ECommerce.Domain.Entities;
 using ECommerce.Domain.Interfaces;
 using ECommerce.Persistence.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +21,13 @@ namespace ECommerce.Persistence
 
             if (specifications is not null)
             {
-                if (specifications.IncludeEcplressions is not null && specifications.IncludeEcplressions.Any())
+
+                if(specifications.Criteria is not null)
+                {
+                    Query = Query.Where(specifications.Criteria);
+                }
+
+                if (specifications.IncludeExplressions is not null && specifications.IncludeExplressions.Any())
                 {
                     //    foreach (var includeExp in specifications.IncludeEcplressions)
                     //    {
@@ -29,7 +35,7 @@ namespace ECommerce.Persistence
                     //    }
 
                                                                 //acummlate  ============ el hadifo 
-                    Query = specifications.IncludeEcplressions.Aggregate(Query, (current, include) => current.Include(include));
+                    Query = specifications.IncludeExplressions.Aggregate(Query, (current, include) => current.Include(include));
 
                     //context.Products.Include(p => p.Category).Include(p => p.Supplier)  ===>  context.Products.Include(p => p.Category).Include(p => p.Supplier)  ===>  context.Products.Include(p => p.Category).Include(p => p.Supplier)
                 }

@@ -16,7 +16,7 @@ namespace ECommerce.Domain.Interfaces
 
 
 
-
+        Task<TEntity> GetByIdAsync(ISpecifications<TEntity,Tkey> specifications);
 
 
         Task<TEntity> GetByIdAsync(Tkey id);

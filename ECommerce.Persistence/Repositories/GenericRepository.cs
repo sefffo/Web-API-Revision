@@ -38,6 +38,12 @@ namespace ECommerce.Persistence.Repositories
         public async Task<TEntity> GetByIdAsync(Tkey id)
             => await context.Set<TEntity>().FindAsync(id);
 
+        public async Task<TEntity?> GetByIdAsync(ISpecifications<TEntity, Tkey> specifications)
+        {
+            return await SpecificationsEvaluator.CreateQuery(context.Set<TEntity>().AsQueryable(), specifications).FirstOrDefaultAsync();
+        }
+
+
         public async Task AddAsync(TEntity entity)
             => await context.Set<TEntity>().AddAsync(entity);
 
@@ -73,8 +79,10 @@ namespace ECommerce.Persistence.Repositories
 
             var Query = SpecificationsEvaluator.CreateQuery(context.Set<TEntity>().AsQueryable(), specifications);
 
-            return  await Query.ToListAsync();
+            return await Query.ToListAsync();
 
         }
+
+
     }
 }
