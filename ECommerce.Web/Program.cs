@@ -8,6 +8,7 @@ using ECommerce.Services.MappingProfiles;
 using ECommerce.Services.Servicies;
 using ECommerce.Web.Extensions;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -23,8 +24,19 @@ namespace ECommerce.Web
 
             #region Registers
 
+            builder.Services.AddScoped<IBasketService, BasketService>();
 
-           
+            builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+
+
+            builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+
+                return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConnection")!);
+
+            });
+
+
 
 
             builder.Services.AddScoped<IProductServivce, ProductService>();
@@ -39,7 +51,7 @@ namespace ECommerce.Web
             //whats the use of transient?
             //it creates a new instance of the service each time it is requested
             //this is useful for lightweight, stateless services
-            builder.Services.AddAutoMapper(mp=>mp
+            builder.Services.AddAutoMapper(mp => mp
             .AddProfile<ProductProfile>()
             );
 
@@ -53,11 +65,15 @@ namespace ECommerce.Web
             builder.Services.AddScoped<IDataInitializer, DataInitializer>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))); 
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
             #endregion
             // Add services to the container.
+
+
+
+
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -74,7 +90,7 @@ namespace ECommerce.Web
                 app.UseSwaggerUI();
                 //app.MapOpenApi();
             }
- 
+
 
 
 

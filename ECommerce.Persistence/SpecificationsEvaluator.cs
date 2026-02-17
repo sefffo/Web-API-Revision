@@ -1,10 +1,6 @@
 ﻿using ECommerce.Domain.Entities;
 using ECommerce.Domain.Interfaces;
-using ECommerce.Persistence.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ECommerce.Persistence
 {
@@ -16,9 +12,6 @@ namespace ECommerce.Persistence
             (IQueryable<TEntiy> EntryPoint, ISpecifications<TEntiy, Tkey> specifications) where TEntiy : BaseEntity<Tkey>
         {
             var Query = EntryPoint; // byb3tt el context 3la el entry point w el entry point hya el db set bta3t el entity
-
-
-
             if (specifications is not null)
             {
 
@@ -31,39 +24,28 @@ namespace ECommerce.Persistence
                     Query = Query.OrderByDescending(specifications.OrderByDescending);
                 }
 
-
                 if (specifications.Criteria is not null)
                 {
                     Query = Query.Where(specifications.Criteria);
                 }
-
-
                 if (specifications.IsPaginationEnabled)
                 {
                     Query = Query.Skip(specifications.Skip).Take(specifications.Take);
                 }
-
                 if (specifications.IncludeExplressions is not null && specifications.IncludeExplressions.Any())
                 {
                     //    foreach (var includeExp in specifications.IncludeEcplressions)
                     //    {
                     //        Query = Query.Include(includeExp);
                     //    }
-
-                                                                                        //acummlate  ============ el hadifo 
+                    
+                    //acummlate  ============ el hadifo 
                     Query = specifications.IncludeExplressions.Aggregate(Query, (current, include) => current.Include(include));
 
                     //context.Products.Include(p => p.Category).Include(p => p.Supplier)  ===>  context.Products.Include(p => p.Category).Include(p => p.Supplier)  ===>  context.Products.Include(p => p.Category).Include(p => p.Supplier)
                 }
 
             }
-
-
-
-
-
-
-
             return Query;
         }
     }

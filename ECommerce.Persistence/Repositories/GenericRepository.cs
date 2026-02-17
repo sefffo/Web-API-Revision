@@ -81,7 +81,7 @@ namespace ECommerce.Persistence.Repositories
 
             return await Query.ToListAsync();
 
-        }
+        } 
 
         public async Task<int> CountAsync(ISpecifications<TEntity, Tkey> specifications)
         {
