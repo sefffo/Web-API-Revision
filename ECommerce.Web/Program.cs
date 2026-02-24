@@ -1,7 +1,10 @@
 using AutoMapper;
+using ECommerce.Domain.Entities.IdentityModule;
 using ECommerce.Domain.Interfaces;
 using ECommerce.Persistence.Data.DataSeed;
 using ECommerce.Persistence.Data.DbContexts;
+using ECommerce.Persistence.Data.IdentityData;
+using ECommerce.Persistence.IdentityData.DataSeeding;
 using ECommerce.Persistence.Repositories;
 using ECommerce.Services.Abstraction;
 using ECommerce.Services.MappingProfiles;
@@ -10,6 +13,7 @@ using ECommerce.Web.CustomMiddleWares;
 using ECommerce.Web.Extensions;
 using ECommerce.Web.Factories;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
@@ -28,6 +32,32 @@ namespace ECommerce.Web
 
             #region Registers
 
+
+
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+
+            builder.Services.AddIdentityCore<AppUser>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationIdentityDbContexts>();
+            //this is the correct way to register identity core services with roles and entity framework stores, 
+            //it allows us to use the identity services without the need for the full identity UI and cookie authentication, which is not needed in an API project
+
+
+
+            //builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<ApplicationIdentityDbContexts>();
+
+
+
+
+
+
+
+
+
+            builder.Services.AddDbContext<ApplicationIdentityDbContexts>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
+                  
 
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
@@ -78,7 +108,9 @@ namespace ECommerce.Web
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            builder.Services.AddScoped<IDataInitializer, DataInitializer>();
+            builder.Services.AddKeyedScoped<IDataInitializer, DataInitializer>("Default");
+            builder.Services.AddKeyedScoped<IDataInitializer, IdentityDataInitializer>("Identity");
+
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -89,6 +121,8 @@ namespace ECommerce.Web
 
 
 
+
+            
 
 
             builder.Services.AddControllers();
@@ -147,7 +181,14 @@ namespace ECommerce.Web
 
             await app.MigrateDatabaseAsync();
 
+            await app.MigrateIdentityDatabaseAsync();
+
+
+            await app.SeedIdentityDataAsync();
+
             await app.SeedDataAsync();
+
+
 
             #endregion
 
