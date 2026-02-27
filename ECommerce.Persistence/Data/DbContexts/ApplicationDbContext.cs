@@ -1,4 +1,5 @@
-﻿using ECommerce.Domain.Entities.ProductModule;
+﻿using ECommerce.Domain.Entities.OrderModule;
+using ECommerce.Domain.Entities.ProductModule;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -18,9 +19,13 @@ namespace ECommerce.Persistence.Data.DbContexts
 
         }
 
+   
+
         public DbSet<Product>Products { get; set; }
         public DbSet<ProductBrand> ProductBrands { get; set; }
         public DbSet<ProductType> ProductTypes { get; set; } 
+
+        public DbSet<Order> Orders { get; set; } 
 
 
     }
