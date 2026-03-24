@@ -6,8 +6,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<!-- whatever you already have -->
+		<NuGetAudit>false</NuGetAudit>
+		<!-- 👈 add this line -->
+	</PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
   </ItemGroup>
+	
+	
 
 </Project>

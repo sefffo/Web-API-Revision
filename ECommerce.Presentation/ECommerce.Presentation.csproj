@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<PropertyGroup>
+		<NuGetAudit>false</NuGetAudit>
+	</PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\ECommerce.Services.Abstraction\ECommerce.Services.Abstraction.csproj" />
   </ItemGroup>

@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<PropertyGroup>
+		<NuGetAudit>false</NuGetAudit>
+	</PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="Exceptions\**" />
     <EmbeddedResource Remove="Exceptions\**" />

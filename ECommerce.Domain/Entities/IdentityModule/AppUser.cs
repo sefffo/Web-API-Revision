@@ -7,12 +7,17 @@ namespace ECommerce.Domain.Entities.IdentityModule
 
         public string DisplayName { get; set; } = default!;
 
-        public Address? Address { get; set; } 
+        public Address? Address { get; set; }
         //Navigation property for the user's address  
         //(the address during the During the Registration  is not needed at the moment but when placing order is needed)
 
 
-        
+
+        //adding the refresh Token 
+        public string? RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiryTime { get; set; }
+
+
     }
 }
  

@@ -41,7 +41,7 @@ namespace ECommerce.Presentation.Controllers
         public async Task<ActionResult<Result<UserDTO>>> GetCurrentUserAsync()
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
-            var token = await HttpContext.GetTokenAsync("access_token"); 
+            var token = await HttpContext.GetTokenAsync("access_token");
 
             return HandleResult(await authenticationService.GetCurrentUserAsync(email!, token!));
         }
@@ -63,5 +63,13 @@ namespace ECommerce.Presentation.Controllers
             return HandleResult(await authenticationService.UpdateUserAddressAsync(email!, addressDto));
         }
 
+
+        [HttpPost("refresh-token")]
+        // No [Authorize] here — access token is expired at this point
+        public async Task<ActionResult<UserDTO>> RefreshToken(RefreshTokenDTO refreshTokenDTO)
+        {
+            var result = await authenticationService.RefreshTokenAsync(refreshTokenDTO);
+            return HandleResult(result);
+        }
     }
 }
