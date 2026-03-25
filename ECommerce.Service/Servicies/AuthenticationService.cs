@@ -51,7 +51,7 @@ namespace ECommerce.Services.Servicies
             {
                 return Error.NotFound("User Not Found", $"User With Email {email} is not Found");
             }
-          
+
 
             var userDto = new UserDTO(email, User.DisplayName, Token, RefreshToken: User.RefreshToken!);
             return Result<UserDTO>.Ok(userDto);
@@ -298,5 +298,52 @@ namespace ECommerce.Services.Servicies
 
             return Result<UserDTO>.Ok(new UserDTO(user.Email!, user.DisplayName, newAccessToken, newRefreshToken));
         }
+
+
+
+        //Adding OAuth by Google 
+
+        public async Task<Result<UserDTO>> HandleGoogleLoginAsync(string email, string name, string googleId)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+
+            if (user is null)
+            {
+                user = new AppUser
+                {
+                    UserName = email,
+                    Email = email,
+                    DisplayName = name,
+                    EmailConfirmed = true // Google already verified the email
+                };
+
+                var createResult = await userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                    return Result<UserDTO>.Fail(
+                        createResult.Errors.Select(e => Error.Validation(e.Code, e.Description)).ToList());
+
+                await userManager.AddLoginAsync(user,
+                    new UserLoginInfo("Google", googleId, "Google"));
+            }
+
+            //Same refresh token pattern as LoginAsync and RegisterAsync
+            var refreshToken = GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            await userManager.UpdateAsync(user);
+
+            var accessToken = await GenerateJWTToken(user);
+
+            return Result<UserDTO>.Ok(new UserDTO(
+                Email: user.Email!,
+                DisplayName: user.DisplayName,
+                Token: accessToken,
+                RefreshToken: refreshToken
+            ));
+        }
+
+
+
+
     }
 }

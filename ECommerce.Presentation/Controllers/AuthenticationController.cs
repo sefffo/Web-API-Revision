@@ -1,8 +1,8 @@
-﻿using ECommerce.Services.Abstraction;
-using ECommerce.SharedLibirary.CommonResult;
+﻿using ECommerce.SharedLibirary.CommonResult;
 using ECommerce.SharedLibirary.DTO_s.IdentityDTOs;
 using ECommerce.SharedLibirary.DTO_s.OrderDTOs;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -71,5 +71,38 @@ namespace ECommerce.Presentation.Controllers
             var result = await authenticationService.RefreshTokenAsync(refreshTokenDTO);
             return HandleResult(result);
         }
+
+
+
+
+
+
+
+        //Google OAuth 
+
+        [HttpGet("google-login")]
+        public IActionResult GoogleLogin()
+        {
+            var redirectUri = Url.Action(nameof(GoogleCallback), "Authentication", null, Request.Scheme);
+            var properties = new AuthenticationProperties { RedirectUri = redirectUri };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet("google-callback")]
+        public async Task<ActionResult<UserDTO>> GoogleCallback()
+        {
+            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+
+            if (!result.Succeeded)
+                return Unauthorized(new { message = "Google authentication failed" });
+
+            var email = result.Principal!.FindFirstValue(ClaimTypes.Email)!;
+            var name = result.Principal!.FindFirstValue(ClaimTypes.Name)!;
+            var googleId = result.Principal!.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var response = await authenticationService.HandleGoogleLoginAsync(email, name, googleId);
+            return HandleResult(response);
+        }
+
     }
 }

@@ -59,5 +59,10 @@ namespace ECommerce.Services.Abstraction
 
         #endregion
 
+
+        //Adding OAuth Service 
+
+        Task<Result<UserDTO>> HandleGoogleLoginAsync(string email, string name, string googleId);
+
     }
 }

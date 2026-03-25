@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace ECommerce.Web
 {
@@ -67,7 +68,14 @@ namespace ECommerce.Web
 
 
                 }
-                );
+                ).AddGoogle(options =>
+                {
+                    options.ClientId = builder.Configuration["GoogleOAuth:ClientId"]!;
+                    options.ClientSecret = builder.Configuration["GoogleOAuth:ClientSecret"]!;
+                    options.CallbackPath = "/signin-google"; // must match Google Console exactly
+                    options.SaveTokens = true;
+                });
+            ;
 
 
 
