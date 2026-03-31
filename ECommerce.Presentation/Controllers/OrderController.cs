@@ -1,11 +1,13 @@
 ﻿using ECommerce.Presentation.Attributes;
 using ECommerce.Services.Abstraction;
 using ECommerce.SharedLibirary.DTO_s.OrderDTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace ECommerce.Presentation.Controllers
 {
+    [Authorize]
     public class OrderController(IOrderService orderService) : ApiBaseController
     {
         [HttpPost]
@@ -13,14 +15,14 @@ namespace ECommerce.Presentation.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var result = await orderService.CreateOrderAsync(orderDto, email);
-            return HandleResult(result); // ✅ unwraps Result<OrderToReturnDTO>
+            return HandleResult(result); 
         }
 
         [HttpGet("DeliveryMethods")]
         public async Task<ActionResult<IEnumerable<DeliveryMethodDTO>>> GetDeliveryMethods()
         {
             var result = await orderService.GetDeliveryMethodsAsync();
-            return HandleResult(result); // ✅ unwraps Result<IEnumerable<DeliveryMethodDTO>>
+            return HandleResult(result);
         }
 
         [HttpGet("AllOrders")]
@@ -29,7 +31,7 @@ namespace ECommerce.Presentation.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var result = await orderService.GetAllOrdersAsync(email);
-            return HandleResult(result); // ✅ unwraps Result<IEnumerable<OrderToReturnDTO>>
+            return HandleResult(result); 
         }
 
         [HttpGet("{orderId}")]
@@ -37,7 +39,7 @@ namespace ECommerce.Presentation.Controllers
         public async Task<ActionResult<OrderToReturnDTO>> GetOrderById(Guid orderId)
         {
             var result = await orderService.GetOrderById(orderId);
-            return HandleResult(result); // ✅ unwraps Result<OrderToReturnDTO>
+            return HandleResult(result); 
         }
     }
 }

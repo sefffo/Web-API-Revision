@@ -12,6 +12,7 @@ using ECommerce.Web.CustomMiddleWares;
 using ECommerce.Web.Extensions;
 using ECommerce.Web.Factories;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -43,8 +44,8 @@ namespace ECommerce.Web
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                     //options.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
                     //options.DefaultChallengeScheme= GoogleDefaults.AuthenticationScheme;
-                     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme; // 👈 ADD THIS
-
+                     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme; // 
+                    
 
                 }
 

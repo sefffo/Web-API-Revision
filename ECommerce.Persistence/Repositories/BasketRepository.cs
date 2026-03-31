@@ -15,7 +15,7 @@ namespace ECommerce.Persistence.Repositories
 
 
 
-    // its diffrent repo bec it use difffrent database 
+    // its different repo bec it use different  database 
     public class BasketRepository : IBasketRepository
     {
 
@@ -32,7 +32,7 @@ namespace ECommerce.Persistence.Repositories
 
             var JsonBasket =  JsonSerializer.Serialize(basket);
 
-                                //value ==> cutomer basket and we need t seralize it 
+                                //value ==> customer basket and we need to serialize it 
             var IsCreatedOrUpdated = await database.StringSetAsync(basket.Id,JsonBasket, (TTL == default) ? TimeSpan.FromDays(7) : TTL);
 
             if(IsCreatedOrUpdated)
