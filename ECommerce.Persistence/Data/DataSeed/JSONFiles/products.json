@@ -3,7 +3,7 @@
     "Name": "Classic White T-Shirt",
     "Description": "A soft cotton white t-shirt that goes with everything. Perfect for casual everyday wear.",
     "Price": 120,
-    "PictureUrl": "images/products/ClassicWhiteTShirt.jpeg",
+    "PictureUrl": "/images/products/ClassicWhiteTShirt.jpeg",
     "TypeId": 1,
     "BrandId": 1
   },
