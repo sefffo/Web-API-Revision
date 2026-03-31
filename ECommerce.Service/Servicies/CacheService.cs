@@ -1,4 +1,4 @@
-﻿using ECommerce.Domain.Interfaces;
+using ECommerce.Domain.Interfaces;
 using ECommerce.Services.Abstraction;
 using System;
 using System.Collections.Generic;
@@ -11,15 +11,18 @@ namespace ECommerce.Services.Servicies
     {
         public async Task<string> GetAsync(string cacheKey)
         {
-            var chachedData = await repository.GetAsync(cacheKey);
-            return chachedData;
+            return await repository.GetAsync(cacheKey);
         }
-         
+
         public async Task setAsync(string cacheKey, object CachedValue, TimeSpan TTL)
         {
             var value = JsonSerializer.Serialize(CachedValue);
-
             await repository.SetAsync(cacheKey, value, TTL);
+        }
+
+        public async Task RemoveAsync(string cacheKey)
+        {
+            await repository.RemoveAsync(cacheKey);
         }
     }
 }

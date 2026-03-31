@@ -1,8 +1,9 @@
-﻿using ECommerce.Presentation.Attributes;
+using ECommerce.Presentation.Attributes;
 using ECommerce.Services.Abstraction;
 using ECommerce.SharedLibirary.DTO_s.OrderDTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 
 namespace ECommerce.Presentation.Controllers
@@ -15,7 +16,16 @@ namespace ECommerce.Presentation.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var result = await orderService.CreateOrderAsync(orderDto, email);
-            return HandleResult(result); 
+
+            // Invalidate AllOrders cache for this user so next GET returns fresh data
+            if (result.IsSuccess)
+            {
+                var cacheService = HttpContext.RequestServices.GetRequiredService<ICacheService>();
+                var cacheKey = $"/api/Order/AllOrders|user-{email}";
+                try { await cacheService.RemoveAsync(cacheKey); } catch { }
+            }
+
+            return HandleResult(result);
         }
 
         [HttpGet("DeliveryMethods")]
@@ -31,7 +41,7 @@ namespace ECommerce.Presentation.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var result = await orderService.GetAllOrdersAsync(email);
-            return HandleResult(result); 
+            return HandleResult(result);
         }
 
         [HttpGet("{orderId}")]
@@ -39,7 +49,7 @@ namespace ECommerce.Presentation.Controllers
         public async Task<ActionResult<OrderToReturnDTO>> GetOrderById(Guid orderId)
         {
             var result = await orderService.GetOrderById(orderId);
-            return HandleResult(result); 
+            return HandleResult(result);
         }
     }
 }
