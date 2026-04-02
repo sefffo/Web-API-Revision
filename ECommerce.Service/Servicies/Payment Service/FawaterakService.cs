@@ -45,6 +45,7 @@ public class FawaterakService : IFawaterakService
     {
         var request = new FawaterakInvoiceRequest
         {
+            ProviderKey = _settings.ProviderKey,
             CartTotal = dto.CartTotal,
             Currency = "EGP",
             Customer = new FawaterakCustomer

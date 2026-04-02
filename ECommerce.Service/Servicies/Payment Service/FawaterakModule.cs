@@ -49,6 +49,9 @@ namespace ECommerce.Services.Servicies.Payment_Service
 
     internal class FawaterakInvoiceRequest
     {
+        [JsonPropertyName("providerKey")]
+        public string ProviderKey { get; set; } = default!;
+
         [JsonPropertyName("cartTotal")]
         public string CartTotal { get; set; } = default!;
 
