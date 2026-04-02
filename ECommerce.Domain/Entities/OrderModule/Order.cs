@@ -5,11 +5,14 @@
     public class Order : BaseEntity<Guid>
     {
 
+
+        public string? PaymentInvoiceId { get; set; } //as a reference  to the payment transaction, useful for tracking and reconciliation with payment providers
+
         public string UserEmail { get; set; } = default!; //store the email of the user who placed the order, for reference and communication purposes
 
         public DateTimeOffset OrderDate { get; set; } = DateTimeOffset.Now; //the date and time when the order was placed, useful for tracking and historical data
 
-        public OrderStatus Status { get; set; } = OrderStatus.Pending; //the current status of the order, initialized to Pending when a new order is created
+        public OrderStatus Status { get; set; } = OrderStatus.PaymentPending; //the current status of the order, initialized to Pending when a new order is created
 
 
 

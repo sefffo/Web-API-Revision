@@ -15,5 +15,6 @@ namespace ECommerce.SharedLibirary.DTO_s.OrderDTOs
         public DateTimeOffset OrderDate { get; set; }
         public decimal SubTotal { get; set; }
         public decimal Total { get; set; }
+        public string? PaymentInvoiceId { get; set; }//for the payment callback to find the order and update its status
     }
 }

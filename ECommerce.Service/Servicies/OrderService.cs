@@ -120,5 +120,24 @@ namespace ECommerce.Services.Servicies
 
             return Result<OrderToReturnDTO>.Ok(mapper.Map<OrderToReturnDTO>(order));
         }
+        public async Task<bool> MarkOrderAsPaidAsync(string invoiceId)
+        {
+            // Get all orders and find the one with this invoiceId
+            var orders = await unitOfWork.GetRepository<Order, Guid>().GetAllAsync();
+            var order = orders.FirstOrDefault(o => o.PaymentInvoiceId == invoiceId);
+
+            if (order is null) return false;
+
+            // Idempotency — already paid, don't process twice
+            if (order.Status == OrderStatus.Paid) return true;
+
+            order.Status = OrderStatus.Paid;
+
+            unitOfWork.GetRepository<Order, Guid>().Update(order);
+
+            var res = await unitOfWork.SaveChangesAsync();
+
+            return res > 0;
+        }
     }
 }

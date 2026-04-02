@@ -8,6 +8,8 @@ using ECommerce.Persistence.Repositories;
 using ECommerce.Services.Abstraction;
 using ECommerce.Services.MappingProfiles;
 using ECommerce.Services.Servicies;
+using ECommerce.Services.Servicies.Payment_Service;
+using ECommerce.SharedLibirary.Settings;
 using ECommerce.Web.CustomMiddleWares;
 using ECommerce.Web.Extensions;
 using ECommerce.Web.Factories;
@@ -91,6 +93,13 @@ namespace ECommerce.Web
 
             #region Registers
 
+
+            // Bind FawaterakSettings
+            builder.Services.Configure<FawaterakSettings>(
+                builder.Configuration.GetSection("FawaterakSettings"));
+
+            // Register FawaterakService with managed HttpClient
+            builder.Services.AddHttpClient<IFawaterakService, FawaterakService>();
 
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
