@@ -85,7 +85,7 @@ namespace ECommerce.Services.Servicies
                     ProductName = Product.Name,
                     PictureUrl = Product.PictureUrl
                 },
-                Price = item.Price,
+                Price = Product.Price,
                 Quantity = item.Quantity
             };
         }

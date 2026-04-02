@@ -18,7 +18,7 @@ namespace ECommerce.Presentation.Controllers
             var result = await orderService.CreateOrderAsync(orderDto, email);
 
             // Invalidate AllOrders cache for this user so next GET returns fresh data
-            if (result.IsSuccess)
+            if (result.isSuccess)
             {
                 var cacheService = HttpContext.RequestServices.GetRequiredService<ICacheService>();
                 var cacheKey = $"/api/Order/AllOrders|user-{email}";
