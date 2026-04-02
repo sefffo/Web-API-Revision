@@ -55,7 +55,7 @@ public class FawaterakService : IFawaterakService
 
         var json = JsonSerializer.Serialize(request, new JsonSerializerOptions
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
         });
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");

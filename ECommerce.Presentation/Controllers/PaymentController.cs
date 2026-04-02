@@ -42,7 +42,7 @@ public class PaymentController : ApiBaseController
         // Build CreateInvoiceDTO using your actual OrderToReturnDTO properties
         var dto = new CreateInvoiceDTO
         {
-            CartTotal = order.Total.ToString("F2"),       // ← Total from OrderToReturnDTO
+            CartTotal = order.OrderItems.Sum(i => i.Price * i.Quantity).ToString("F2"),         
             FirstName = model.FirstName,
             LastName = model.LastName,
             Email = model.Email,
