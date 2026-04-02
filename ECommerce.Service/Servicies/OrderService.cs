@@ -13,15 +13,12 @@ namespace ECommerce.Services.Servicies
     {
         public async Task<Result<OrderToReturnDTO>> CreateOrderAsync(OrderDTO orderDTO, string Email)
         {
-            // 1 - map shipping address
             var orderAddress = mapper.Map<OrderShippingAddress>(orderDTO.Address);
 
-            // 2 - get basket from redis
             var Basket = await basketRepository.GetBasketAsync(orderDTO.BasketId);
             if (Basket == null)
                 return Error.NotFound("Basket not found", $"Basket With Id : {orderDTO.BasketId} is Not Found");
 
-            // 3 - build order items
             List<OrderItem> OrderItems = new List<OrderItem>();
             foreach (var item in Basket.Items)
             {
@@ -32,12 +29,10 @@ namespace ECommerce.Services.Servicies
                 OrderItems.Add(CreateOrderItem(item, Product));
             }
 
-            // 4 - get delivery method
             var DeliveryMethod = await unitOfWork.GetRepository<DeliveryMethod, int>().GetByIdAsync(orderDTO.DeliveryMethoId);
             if (DeliveryMethod is null)
                 return Error.NotFound("Delivery method not found", $"Delivery method With Id : {orderDTO.DeliveryMethoId} is Not Found");
 
-            // 5 - check for duplicate order (same basket items + same delivery method)
             var existingOrdersSpec = new OrderSpecifications(Email);
             var existingOrders = await unitOfWork.GetRepository<Order, Guid>().GetAllAsync(existingOrdersSpec);
 
@@ -53,10 +48,8 @@ namespace ECommerce.Services.Servicies
             if (duplicate is not null)
                 return Result<OrderToReturnDTO>.Ok(mapper.Map<OrderToReturnDTO>(duplicate));
 
-            // 6 - calculate subtotal
             var Subtotal = OrderItems.Sum(item => item.Price * item.Quantity);
 
-            // 7 - create and save order
             var Order = new Order
             {
                 UserEmail = Email,
@@ -120,15 +113,29 @@ namespace ECommerce.Services.Servicies
 
             return Result<OrderToReturnDTO>.Ok(mapper.Map<OrderToReturnDTO>(order));
         }
+
+        public async Task<bool> SetOrderInvoiceIdAsync(Guid orderId, string invoiceId)
+        {
+            var spec = new OrderSpecifications(orderId);
+            var order = await unitOfWork.GetRepository<Order, Guid>().GetByIdAsync(spec);
+
+            if (order is null) return false;
+
+            order.PaymentInvoiceId = invoiceId;
+
+            unitOfWork.GetRepository<Order, Guid>().Update(order);
+
+            var res = await unitOfWork.SaveChangesAsync();
+            return res > 0;
+        }
+
         public async Task<bool> MarkOrderAsPaidAsync(string invoiceId)
         {
-            // Get all orders and find the one with this invoiceId
             var orders = await unitOfWork.GetRepository<Order, Guid>().GetAllAsync();
             var order = orders.FirstOrDefault(o => o.PaymentInvoiceId == invoiceId);
 
             if (order is null) return false;
 
-            // Idempotency — already paid, don't process twice
             if (order.Status == OrderStatus.Paid) return true;
 
             order.Status = OrderStatus.Paid;
