@@ -55,7 +55,7 @@ public class PaymentController : ApiBaseController
         // Call Fawaterak
         var (paymentUrl, invoiceId) = await _fawaterakService.CreateInvoiceAsync(dto);
 
-        // ✅ Save invoiceId to the Order in DB so the callback can find it later
+        //Save invoiceId to the Order in DB so the callback can find it later
         await _orderService.SaveInvoiceIdAsync(model.OrderId, invoiceId);
 
         return Ok(new { paymentUrl, invoiceId });
