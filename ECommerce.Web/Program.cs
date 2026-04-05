@@ -108,7 +108,7 @@ namespace ECommerce.Web
 
             //builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            //builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
             builder.Services.AddIdentityCore<AppUser>(options =>
             {
@@ -239,13 +239,7 @@ namespace ECommerce.Web
 
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-                //app.MapOpenApi();
-            }
-
+ 
 
 
 
@@ -271,6 +265,14 @@ namespace ECommerce.Web
 
 
             app.UseHttpsRedirection();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+                //app.MapOpenApi();
+            }
+
 
             app.MapStaticAssets();
 
