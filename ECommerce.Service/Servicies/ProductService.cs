@@ -11,9 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ECommerce.Services.Servicies
+namespace ECommerce.Services.Services
 {
-    public class ProductService(IUnitOfWork unitOfWork, IMapper mapper) : IProductServivce
+    public class ProductService(IUnitOfWork unitOfWork, IMapper mapper) : IProductService
     {
         public async Task<IEnumerable<BrandDto>> GetAllBrandsAsync()
         {

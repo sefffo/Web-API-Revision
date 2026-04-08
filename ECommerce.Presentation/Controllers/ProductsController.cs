@@ -16,7 +16,7 @@ namespace ECommerce.Presentation.Controllers
 
 
     [Authorize]
-    public class ProductsController(IProductServivce servivce) : ApiBaseController
+    public class ProductsController(IProductService service) : ApiBaseController
     {
 
         [HttpGet]
@@ -24,7 +24,7 @@ namespace ECommerce.Presentation.Controllers
         //baseUrl: api/products
         public async Task<ActionResult<PaginatedResult<ProductDto>>> GetAllProductsAsync([FromQuery] ProductQueryPrams queryPrams)
         {
-            var products = await servivce.GetAllProductsAsync(queryPrams);
+            var products = await service.GetAllProductsAsync(queryPrams);
 
             //must be a response with status code 200 and the list of products in the body
             //on a working project the response must hava a certain form 
@@ -37,7 +37,7 @@ namespace ECommerce.Presentation.Controllers
         //baseurl : api/products/{id}
         public async Task<ActionResult<ProductDto>> GetProductByIdAsync(int id)
         {
-            var product = await servivce.GetProductByIdAsync(id);
+            var product = await service.GetProductByIdAsync(id);
 
             return HandleResult<ProductDto>(product) ;
 
@@ -49,7 +49,7 @@ namespace ECommerce.Presentation.Controllers
         [RedisCache]
         public async Task<ActionResult<IEnumerable<BrandDto>>> GetAllBrandsAsync()
         {
-            var brands = await servivce.GetAllBrandsAsync();
+            var brands = await service.GetAllBrandsAsync();
             return Ok(brands);
 
         }
@@ -59,7 +59,7 @@ namespace ECommerce.Presentation.Controllers
         ///baseUrl : api/products/types
         public async Task<ActionResult<IEnumerable<TypeDto>>> GetAllTypesAsync()
         {
-            var types = await servivce.GetAllTypesAsync();
+            var types = await service.GetAllTypesAsync();
             return Ok(types);
 
         }

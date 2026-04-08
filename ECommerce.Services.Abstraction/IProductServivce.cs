@@ -5,7 +5,7 @@ using ECommerce.SharedLibirary.DTO_s.ProductDtos;
 
 namespace ECommerce.Services.Abstraction
 {
-    public interface IProductServivce
+    public interface IProductService
     {
 
         Task<PaginatedResult<ProductDto>> GetAllProductsAsync(ProductQueryPrams queryPrams);

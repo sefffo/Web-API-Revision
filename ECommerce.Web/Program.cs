@@ -7,6 +7,7 @@ using ECommerce.Persistence.IdentityData.DataSeeding;
 using ECommerce.Persistence.Repositories;
 using ECommerce.Services.Abstraction;
 using ECommerce.Services.MappingProfiles;
+using ECommerce.Services.Services;
 using ECommerce.Services.Servicies;
 using ECommerce.Services.Servicies.Payment_Service;
 using ECommerce.SharedLibirary.Settings;
@@ -161,7 +162,7 @@ namespace ECommerce.Web
 
 
 
-            builder.Services.AddScoped<IProductServivce, ProductService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
 
 
 
