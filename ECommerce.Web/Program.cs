@@ -276,6 +276,7 @@ namespace ECommerce.Web
 
 
             app.MapStaticAssets();
+            app.UseStaticFiles();
 
             app.UseAuthentication();
             app.UseAuthorization();
