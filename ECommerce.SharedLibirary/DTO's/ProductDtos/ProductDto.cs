@@ -7,15 +7,14 @@ namespace ECommerce.SharedLibirary.DTO_s.ProductDtos
     public class ProductDto
     {
 
-        //data transfar object for product entity from layer to another layer
+        //data transfer  object for product entity from layer to another layer
 
         public int Id { get; set; }
         public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
-        public string ProductId { get; set; } = null!;
 
         public string PictureUrl { get; set; } = null!;
-        decimal Price { get; set; }
+        public decimal Price { get; set; }
 
 
 

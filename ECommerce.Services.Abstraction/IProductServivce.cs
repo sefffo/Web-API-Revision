@@ -16,11 +16,19 @@ namespace ECommerce.Services.Abstraction
         Task<IEnumerable<BrandDto>> GetAllBrandsAsync();
 
 
-        Task<IEnumerable<TypeDto>> GetAllTypesAsync();  
+        Task<IEnumerable<TypeDto>> GetAllTypesAsync();
 
 
 
-        
+        Task<Result<BrandDto>> CreateBrandAsync(CreateBrandDto dto);
+
+        Task<Result<TypeDto>> CreateTypeAsync(CreateTypeDto dto);
+
+
+        Task<Result<ProductDto>> CreateProductAsync(CreateProductDto createProductDto);
+
+
+
 
     }
 }
