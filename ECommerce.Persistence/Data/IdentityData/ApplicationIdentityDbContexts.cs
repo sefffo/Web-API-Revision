@@ -39,7 +39,7 @@ namespace ECommerce.Persistence.Data.IdentityData
 
 
             // Additional model configurations can be added here
-            builder.ApplyConfigurationsFromAssembly(typeof(ApplicationIdentityDbContexts).Assembly);
+            //builder.ApplyConfigurationsFromAssembly(typeof(ApplicationIdentityDbContexts).Assembly);
         }
 
         //public DbSet<Address> Addresses { get; set; }
