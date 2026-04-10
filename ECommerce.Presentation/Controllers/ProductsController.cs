@@ -65,7 +65,7 @@ namespace ECommerce.Presentation.Controllers
         }
 
 
-        [HttpPost("/CreateBrand")]
+        [HttpPost("CreateBrand")]
         [Authorize (Roles = "Admin")]
         public async Task<IActionResult> CreateBrandAsync([FromBody] CreateBrandDto createBrandDto)
         {
@@ -78,7 +78,7 @@ namespace ECommerce.Presentation.Controllers
         }
 
 
-        [HttpPost("/CreateType")]
+        [HttpPost("CreateType")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateTypeAsync([FromBody] CreateTypeDto createTypeDto)
         {
