@@ -11,7 +11,7 @@ namespace ECommerce.Presentation.Controllers
         
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> UploadFile([FromForm]UploadImageDto uploadImageDto)
         {
             // 1. Check DTO + file
