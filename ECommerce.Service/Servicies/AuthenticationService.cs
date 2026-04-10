@@ -133,11 +133,6 @@ namespace ECommerce.Services.Servicies
 
         public async Task<Result<UserDTO>> RegisterAsync(RegisterDTO registerDTO)
         {
-
-
-
-
-
             var user = new AppUser
             {
                 Email = registerDTO.Email,
@@ -148,10 +143,12 @@ namespace ECommerce.Services.Servicies
 
 
             };
-
+            
             var result = await userManager.CreateAsync(user, registerDTO.Password);
             if (result.Succeeded)
             {
+                await userManager.AddToRoleAsync(user, role: "User"); //to ensure first that the suer is created in the DB so we can assign it a role
+                // without getting an error of "User not found" because the user is not created yet in the DB and then we can assign it a role
                 var refreshToken = GenerateRefreshToken();
                 user.RefreshToken = refreshToken;
                 user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
@@ -316,14 +313,23 @@ namespace ECommerce.Services.Servicies
                     DisplayName = name,
                     EmailConfirmed = true // Google already verified the email
                 };
-
+              
                 var createResult = await userManager.CreateAsync(user);
                 if (!createResult.Succeeded)
                     return Result<UserDTO>.Fail(
                         createResult.Errors.Select(e => Error.Validation(e.Code, e.Description)).ToList());
-
+                await userManager.AddToRoleAsync(user, role: "User");
                 await userManager.AddLoginAsync(user,
                     new UserLoginInfo("Google", googleId, "Google"));
+            }
+            //The else guard is for a completely different scenario — an AppUser row that exists in AspNetUsers but has no entry in AspNetUserRoles. This happens when:
+                //Someone registered via Google before you added the AddToRoleAsync line — they exist in the DB but were never assigned a role
+                //Any edge case where user creation succeeded but role assignment failed silently
+            else
+            {
+                var roles = await userManager.GetRolesAsync(user);
+                if (!roles.Any())
+                    await userManager.AddToRoleAsync(user, "User");
             }
 
             //Same refresh token pattern as LoginAsync and RegisterAsync

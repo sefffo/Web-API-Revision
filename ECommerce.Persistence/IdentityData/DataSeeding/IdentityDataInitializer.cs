@@ -20,6 +20,8 @@ namespace ECommerce.Persistence.IdentityData.DataSeeding
                 {
                     await roleManager.CreateAsync(new IdentityRole("Admin"));
                     await roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
+                    await roleManager.CreateAsync(new IdentityRole("User"));
+
 
                     //await roleManager.CreateAsync(new IdentityRole("Customer"));
 

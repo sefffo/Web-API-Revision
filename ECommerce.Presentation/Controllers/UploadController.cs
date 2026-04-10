@@ -1,5 +1,6 @@
 ﻿using ECommerce.Services.Abstraction;
 using ECommerce.SharedLibirary.CommonResult;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
@@ -10,6 +11,7 @@ namespace ECommerce.Presentation.Controllers
         
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UploadFile([FromForm]UploadImageDto uploadImageDto)
         {
             // 1. Check DTO + file

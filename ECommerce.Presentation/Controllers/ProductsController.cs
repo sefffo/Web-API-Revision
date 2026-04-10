@@ -16,7 +16,6 @@ namespace ECommerce.Presentation.Controllers
 
 
 
-    [Authorize]
     public class ProductsController(IProductService service) : ApiBaseController
     {
 
@@ -28,7 +27,7 @@ namespace ECommerce.Presentation.Controllers
             var products = await service.GetAllProductsAsync(queryPrams);
 
             //must be a response with status code 200 and the list of products in the body
-            //on a working project the response must hava a certain form 
+            //on a working project the response must have a certain form 
             return Ok(products);
         }
 
@@ -67,7 +66,9 @@ namespace ECommerce.Presentation.Controllers
 
 
         [HttpPost("brands")]
-        //[Authorize (Roles = "Admin")]
+        [Authorize (Roles = "Admin")]
+        [Authorize(Roles = "SuperAdmin")]
+
         public async Task<IActionResult> CreateBrandAsync([FromBody] CreateBrandDto createBrandDto)
         {
             var createdBrand = await service.CreateBrandAsync(createBrandDto);
@@ -80,7 +81,9 @@ namespace ECommerce.Presentation.Controllers
 
 
         [HttpPost("types")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "SuperAdmin")]
+
         public async Task<IActionResult> CreateTypeAsync([FromBody] CreateTypeDto createTypeDto)
         {
             var createdType = await service.CreateTypeAsync(createTypeDto);
@@ -93,7 +96,8 @@ namespace ECommerce.Presentation.Controllers
 
 
         [HttpPost]
-        //[Authorize (Roles = "Admin")]
+        [Authorize (Roles = "Admin")]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> CreateProductAsync([FromBody] CreateProductDto createProductDto)
         { 
             
