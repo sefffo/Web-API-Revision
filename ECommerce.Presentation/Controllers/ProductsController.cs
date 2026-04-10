@@ -1,4 +1,5 @@
-﻿using ECommerce.Presentation.Attributes;
+﻿using ECommerce.Domain.Entities.ProductModule;
+using ECommerce.Presentation.Attributes;
 using ECommerce.Services.Abstraction;
 using ECommerce.SharedLibirary;
 using ECommerce.SharedLibirary.CommonResult;
@@ -65,27 +66,27 @@ namespace ECommerce.Presentation.Controllers
         }
 
 
-        [HttpPost("CreateBrand")]
+        [HttpPost("brands")]
         [Authorize (Roles = "Admin")]
         public async Task<IActionResult> CreateBrandAsync([FromBody] CreateBrandDto createBrandDto)
         {
             var createdBrand = await service.CreateBrandAsync(createBrandDto);
             if(!createdBrand.isSuccess)
             {
-                return BadRequest(createdBrand.Errors);
+                return HandleResult<BrandDto>(createdBrand);
             }
             return StatusCode(StatusCodes.Status201Created, createdBrand.value);
         }
 
 
-        [HttpPost("CreateType")]
+        [HttpPost("types")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateTypeAsync([FromBody] CreateTypeDto createTypeDto)
         {
             var createdType = await service.CreateTypeAsync(createTypeDto);
             if (!createdType.isSuccess)
             {
-                return BadRequest(createdType.Errors);
+                return HandleResult<TypeDto>(createdType);
             }
             return StatusCode(StatusCodes.Status201Created, createdType.value);
         }
@@ -100,7 +101,7 @@ namespace ECommerce.Presentation.Controllers
 
             if(!createdProduct.isSuccess)
             {
-                return BadRequest(createdProduct.Errors);
+                return HandleResult<ProductDto>(createdProduct);
             }
 
             return StatusCode(StatusCodes.Status201Created, createdProduct.value);
