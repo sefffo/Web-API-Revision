@@ -14,7 +14,7 @@ using System.Text;
 
 namespace ECommerce.Services.Servicies
 {
-    public class AuthenticationService(UserManager<AppUser> userManager,RoleManager<AppUser> roleManager, IConfiguration configuration, IMapper mapper) : IAuthenticationService
+    public class AuthenticationService(UserManager<AppUser> userManager,RoleManager<IdentityRole> roleManager, IConfiguration configuration, IMapper mapper) : IAuthenticationService
     {
 
 
