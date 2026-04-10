@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
 using ECommerce.Domain.Entities.ProductModule;
 using ECommerce.SharedLibirary.DTO_s.ProductDtos;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ECommerce.Services.MappingProfiles
 {
@@ -28,7 +25,11 @@ namespace ECommerce.Services.MappingProfiles
 
 
             //write side of my requests (commands) to create a new product and map it to the product entity to save it in the database
-            CreateMap<CreateBrandDto, Product>();
+            CreateMap<CreateProductDto, Product>()
+             .ForMember(dest => dest.ProductBrand, opt => opt.Ignore()) //  it's a nav prop, set manually
+             .ForMember(dest => dest.ProductType, opt => opt.Ignore())  //  same
+             .ForMember(dest => dest.BrandId, opt => opt.Ignore())      // set manually in service
+             .ForMember(dest => dest.TypeId, opt => opt.Ignore());      //  set manually in service
             CreateMap<CreateBrandDto, ProductBrand>();
             CreateMap<CreateTypeDto, ProductType>();
 

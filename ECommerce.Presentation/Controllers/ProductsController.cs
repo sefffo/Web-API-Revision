@@ -67,7 +67,7 @@ namespace ECommerce.Presentation.Controllers
 
 
         [HttpPost("brands")]
-        [Authorize (Roles = "Admin")]
+        //[Authorize (Roles = "Admin")]
         public async Task<IActionResult> CreateBrandAsync([FromBody] CreateBrandDto createBrandDto)
         {
             var createdBrand = await service.CreateBrandAsync(createBrandDto);
@@ -80,7 +80,7 @@ namespace ECommerce.Presentation.Controllers
 
 
         [HttpPost("types")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateTypeAsync([FromBody] CreateTypeDto createTypeDto)
         {
             var createdType = await service.CreateTypeAsync(createTypeDto);
@@ -93,7 +93,7 @@ namespace ECommerce.Presentation.Controllers
 
 
         [HttpPost]
-        [Authorize (Roles = "Admin")]
+        //[Authorize (Roles = "Admin")]
         public async Task<IActionResult> CreateProductAsync([FromBody] CreateProductDto createProductDto)
         { 
             
