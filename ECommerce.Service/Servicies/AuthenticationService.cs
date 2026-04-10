@@ -14,7 +14,7 @@ using System.Text;
 
 namespace ECommerce.Services.Servicies
 {
-    public class AuthenticationService(UserManager<AppUser> userManager, IConfiguration configuration, IMapper mapper) : IAuthenticationService
+    public class AuthenticationService(UserManager<AppUser> userManager,RoleManager<AppUser> roleManager, IConfiguration configuration, IMapper mapper) : IAuthenticationService
     {
 
 
@@ -342,8 +342,34 @@ namespace ECommerce.Services.Servicies
             ));
         }
 
+        public async Task<Result<string>> AssignRoleAsync(AssignRoleDTO assignRoleDTO)
+        {
+            var User = await userManager.FindByEmailAsync(assignRoleDTO.UserEmail);
+
+            if (User == null)
+            {
+                return Error.NotFound("User Not Found", $"User With Email {assignRoleDTO.UserEmail} is not Found");
+            }
+
+            var RoleExists = await roleManager.RoleExistsAsync(assignRoleDTO.RoleName);
+
+            if (!RoleExists)
+            {
+                return Error.NotFound("Role Not Found", $"Role With Name {assignRoleDTO.RoleName} is not Found");
+            }
 
 
+            var result = await userManager.AddToRoleAsync(User, assignRoleDTO.RoleName);
 
+            if (!result.Succeeded)
+            {
+
+                return Error.Failure("Failed to assign role", $"Failed to assign role {assignRoleDTO.RoleName} to user {assignRoleDTO.UserEmail}");
+            }
+
+
+            return Result<string>.Ok($"Role {assignRoleDTO.RoleName} assigned to user {assignRoleDTO.UserEmail} successfully");
+
+        }
     }
 }

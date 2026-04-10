@@ -7,6 +7,11 @@ namespace ECommerce.Services.Abstraction
 {
     public interface IAuthenticationService
     {
+
+        // Role Management
+        Task<Result<string>> AssignRoleAsync(AssignRoleDTO assignRoleDTO);
+
+
         //login 
         Task<Result<UserDTO>> LoginAsync(LoginDTO loginDTO);
 

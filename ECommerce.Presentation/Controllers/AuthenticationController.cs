@@ -11,6 +11,23 @@ namespace ECommerce.Presentation.Controllers
 {
     public class AuthenticationController(Services.Abstraction.IAuthenticationService authenticationService) : ApiBaseController
     {
+
+        [HttpPost("assign-role")]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<ActionResult> AssignRole(AssignRoleDTO assignRoleDTO)
+        {
+            var result = await authenticationService.AssignRoleAsync(assignRoleDTO);
+            if (result.isSuccess)
+                return Ok();
+            return HandleResult(result);
+        }
+
+
+
+
+
+
+
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
         {
