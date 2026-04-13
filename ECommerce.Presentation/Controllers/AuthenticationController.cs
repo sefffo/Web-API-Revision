@@ -1,7 +1,8 @@
-﻿using ECommerce.SharedLibirary.CommonResult;
+using ECommerce.SharedLibirary.CommonResult;
 using ECommerce.SharedLibirary.DTO_s.IdentityDTOs;
 using ECommerce.SharedLibirary.DTO_s.OrderDTOs;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -108,7 +109,11 @@ namespace ECommerce.Presentation.Controllers
         [HttpGet("google-callback")]
         public async Task<ActionResult<UserDTO>> GoogleCallback()
         {
-            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+            // Authenticate against the Cookie scheme — this is where Google deposits
+            // the external identity after the OAuth handshake completes.
+            // Using GoogleDefaults.AuthenticationScheme here would re-trigger the
+            // redirect instead of reading the already-completed result.
+            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             if (!result.Succeeded)
                 return Unauthorized(new { message = "Google authentication failed" });
