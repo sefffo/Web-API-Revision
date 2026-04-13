@@ -1,4 +1,4 @@
-﻿using ECommerce.Domain.Entities.IdentityModule;
+using ECommerce.Domain.Entities.IdentityModule;
 using ECommerce.Domain.Interfaces;
 using ECommerce.Persistence.Data.IdentityData;
 using Microsoft.AspNetCore.Identity;
@@ -15,17 +15,18 @@ namespace ECommerce.Persistence.IdentityData.DataSeeding
         {
             try
             {
+                // Check each role individually using RoleManager so NormalizedName
+                // is always set correctly by the normalizer.
+                // This self-heals even if the Roles table already has rows from a
+                // previous run that bypassed RoleManager (e.g. missing NormalizedName).
+                string[] roles = ["Admin", "SuperAdmin", "User"];
 
-                if (!roleManager.Roles.Any())
+                foreach (var role in roles)
                 {
-                    await roleManager.CreateAsync(new IdentityRole("Admin"));
-                    await roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
-                    await roleManager.CreateAsync(new IdentityRole("User"));
-
-
-                    //await roleManager.CreateAsync(new IdentityRole("Customer"));
-
+                    if (!await roleManager.RoleExistsAsync(role))
+                        await roleManager.CreateAsync(new IdentityRole(role));
                 }
+
                 if (!userManager.Users.Any())
                 {
                     var user = new AppUser
@@ -34,7 +35,6 @@ namespace ECommerce.Persistence.IdentityData.DataSeeding
                         Email = "saif@gmail.com",
                         DisplayName = "Saif Lotfy",
                         PhoneNumber = "01000000000"
-
                     };
                     var user2 = new AppUser
                     {
@@ -42,7 +42,6 @@ namespace ECommerce.Persistence.IdentityData.DataSeeding
                         Email = "Omar@gmail.com",
                         DisplayName = "Omar Lotfy",
                         PhoneNumber = "01000000001"
-
                     };
                     var user3 = new AppUser
                     {
@@ -60,9 +59,7 @@ namespace ECommerce.Persistence.IdentityData.DataSeeding
 
                     await userManager.CreateAsync(user3, "SuperAdmin@123");
                     await userManager.AddToRoleAsync(user3, "SuperAdmin");
-
                 }
-
             }
             catch (Exception ex)
             {
