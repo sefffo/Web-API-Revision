@@ -6,10 +6,14 @@
 #   3. api       — Your ASP.NET Core 10 ECommerce API
 #
 # How to run:
-#   docker-compose up --build    ← first time (builds the API image)
+#   docker-compose up --build    ← first time (builds API image from source)
 #   docker-compose up            ← subsequent runs (uses cached image)
 #   docker-compose down          ← stop and remove containers
-#   docker-compose down -v       ← also wipe the database volume
+#   docker-compose down -v       ← also wipe the database volume (data loss!)
+#
+# How to switch between local build and Docker Hub image:
+#   - LOCAL BUILD (default): keep the "build:" block, remove/comment "image:"
+#   - DOCKER HUB IMAGE: comment out "build:" block, uncomment "image:" line
 # =============================================================
 
 version: '3.9'
@@ -38,8 +42,8 @@ services:
     ports:
       # Format: "HOST_PORT:CONTAINER_PORT"
       # Maps your machine's port 1433 to the container's port 1433.
-      # This lets you connect from SSMS on your host using localhost,1433.
-      # If you have a local SQL Server already using 1433, change to e.g. "1434:1433".
+      # Lets you connect from SSMS on your host using: localhost,1433
+      # If you already have a local SQL Server on 1433, change to e.g. "1434:1433".
       - "1433:1433"
 
     volumes:
@@ -52,8 +56,7 @@ services:
 
     networks:
       # Attach to our custom bridge network.
-      # Containers on the same network can reach each other
-      # by service name (e.g. "sqlserver") instead of IP address.
+      # Containers on the same network reach each other by service name.
       - ecomm_network
 
     healthcheck:
@@ -70,7 +73,7 @@ services:
       timeout: 5s        # if the check takes longer than 5s, mark as failed
       retries: 10        # mark as unhealthy after 10 consecutive failures
       start_period: 30s  # give SQL Server 30s grace period before checks start
-                         # (SQL Server takes time to initialize on first boot)
+                         # (SQL Server takes ~20-30s to fully initialize on first boot)
 
 
   # ===========================================================
@@ -88,7 +91,7 @@ services:
 
     ports:
       # Maps host port 6379 to container port 6379 (Redis default).
-      # Lets you connect with Redis Desktop Manager or redis-cli from your host.
+      # Lets you connect from Redis Desktop Manager or redis-cli on your host.
       - "6379:6379"
 
     networks:
@@ -106,21 +109,37 @@ services:
   # ===========================================================
   # SERVICE 3: API
   # Your ASP.NET Core 10 ECommerce API.
-  # Built from the Dockerfile in the repo root.
+  #
+  # TWO MODES — choose one:
+  #
+  # MODE A — LOCAL BUILD (development, default)
+  #   Uses the Dockerfile in the repo root to build the image.
+  #   Use this when you're actively developing and changing code.
+  #   Command: docker-compose up --build
+  #
+  # MODE B — DOCKER HUB IMAGE (production / sharing)
+  #   Pulls the pre-built image from Docker Hub. No source code needed.
+  #   Use this when deploying on a server or sharing with others.
+  #   Steps to publish: docker build -t saif31/ecomm-api:latest .
+  #                     docker push saif31/ecomm-api:latest
+  #   Then swap the blocks below and run: docker-compose up
   # ===========================================================
   api:
-    # Name of the Docker image for the API service.
-    image:  sefffo/ecomm-api:latest  
+
+    # ── MODE A: LOCAL BUILD (active) ──────────────────────────
+    # Builds the image from the Dockerfile in the repo root.
+    # When both "image:" and "build:" are present, Compose builds
+    # the image AND tags it with the image name automatically.
+    # This means after running docker-compose up --build, you can
+    # push directly with: docker push saif31/ecomm-api:latest
+    image: saif31/ecomm-api:latest
     build:
-      # context: "." means use the repo root as the Docker build context.
-      # Docker sends all files from this folder (filtered by .dockerignore)
-      # to the Docker daemon to build the image.
-      context: .
+      context: .          # use repo root as Docker build context
       dockerfile: Dockerfile
 
-    # To use a pre-built image from Docker Hub instead of building locally,
-    # comment out the build block above and uncomment the line below:
-    # image: sefffo/ecomm-api:latest
+    # ── MODE B: DOCKER HUB IMAGE (swap to this for production) ─
+    # Comment out the image + build block above, uncomment below:
+    # image: saif31/ecomm-api:latest
 
     container_name: ecomm_api
 
@@ -134,20 +153,19 @@ services:
     environment:
       # ── ASP.NET Core Environment ──────────────────────────────
       # Tells ASP.NET Core which environment it's running in.
-      # This causes it to load appsettings.Docker.json on top of appsettings.json.
+      # Causes it to load appsettings.Docker.json on top of appsettings.json.
       # The Docker-specific file overrides connection strings for container networking.
       - ASPNETCORE_ENVIRONMENT=Docker
 
       # ── Connection Strings ────────────────────────────────────
-      # ASP.NET Core reads nested JSON keys from environment variables
-      # using DOUBLE UNDERSCORE (__) as the separator.
-      # So ConnectionStrings__DefaultConnection maps to:
+      # ASP.NET Core reads nested JSON keys from env vars using
+      # DOUBLE UNDERSCORE (__) as the key separator.
+      # ConnectionStrings__DefaultConnection maps to:
       # { "ConnectionStrings": { "DefaultConnection": "..." } }
       #
-      # IMPORTANT: "Server=sqlserver" — "sqlserver" here is NOT localhost.
-      # It's the Docker service name defined above. Inside the ecomm_network,
-      # Docker's built-in DNS resolves "sqlserver" to the container's IP.
-      # This is why containers can find each other by name, not IP address.
+      # "Server=sqlserver" — "sqlserver" is NOT localhost here.
+      # It's the Docker service name defined above. Docker's built-in
+      # DNS resolves it to the SQL Server container's IP inside ecomm_network.
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=ECommRevDb;User Id=sa;Password=YourStrong@Passw0rd;MultipleActiveResultSets=true;TrustServerCertificate=True;
       - ConnectionStrings__IdentityConnection=Server=sqlserver,1433;Database=ECommRevIdentityDb;User Id=sa;Password=YourStrong@Passw0rd;MultipleActiveResultSets=true;TrustServerCertificate=True;
 
@@ -155,21 +173,20 @@ services:
       # resolved to the Redis container's IP inside ecomm_network.
       - ConnectionStrings__RedisConnection=redis:6379
 
-      # ── JWT Settings ─────────────────────────────────────────
-      # Maps to JwtOptions section in appsettings.json.
+      # ── JWT Settings ──────────────────────────────────────────
+      # Maps to the JwtOptions section in appsettings.json.
       # JwtOptions__Issuer → { "JwtOptions": { "Issuer": "..." } }
       - JwtOptions__Issuer=http://localhost:5262/
       - JwtOptions__Audience=http://localhost:5262/api
       - JwtOptions__securityKey=738343ecdea9062836f7a086e662fbbdb73e1138
 
     depends_on:
-      # depends_on with condition: service_healthy means the api container
-      # will NOT start until both sqlserver and redis pass their healthchecks.
+      # The api container will NOT start until sqlserver and redis
+      # pass their healthchecks (not just started — actually ready).
       #
-      # Without this: the API starts immediately, tries to run EF Core
-      # migrations, SQL Server isn't ready yet → crash.
-      # With this: Docker waits for SQL Server to be fully initialized
-      # before even creating the API container.
+      # Without this: API starts immediately, EF Core tries to migrate,
+      # SQL Server isn't ready yet → connection crash.
+      # With this: Docker holds the API until SQL Server accepts connections.
       sqlserver:
         condition: service_healthy
       redis:
@@ -182,23 +199,23 @@ services:
 # =============================================================
 # VOLUMES
 # Named volumes are managed by Docker and persist on the host
-# even after containers are removed.
-# "docker-compose down" removes containers but NOT volumes.
-# "docker-compose down -v" removes containers AND volumes (data loss!).
+# even after containers are stopped or removed.
+# "docker-compose down"    → removes containers, keeps volumes
+# "docker-compose down -v" → removes containers AND volumes (wipes DB!)
 # =============================================================
 volumes:
-  sqlserver_data:  # stores all SQL Server database files
+  sqlserver_data:  # stores all SQL Server .mdf and .ldf database files
 
 
 # =============================================================
 # NETWORKS
-# A custom bridge network isolates our containers from other
-# Docker containers on your machine.
+# A custom bridge network isolates our 3 containers from other
+# Docker containers running on your machine.
 #
 # Bridge network features:
-#   - Containers on the same network find each other by service name
-#   - Traffic between containers stays internal (not exposed to host)
-#   - Containers are isolated from the default Docker bridge network
+#   - Containers find each other by service name (Docker internal DNS)
+#   - Traffic between containers stays inside Docker (not on host network)
+#   - Isolated from the default Docker bridge and other compose projects
 # =============================================================
 networks:
   ecomm_network:
