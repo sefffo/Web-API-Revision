@@ -109,6 +109,8 @@ services:
   # Built from the Dockerfile in the repo root.
   # ===========================================================
   api:
+    # Name of the Docker image for the API service.
+    image:  sefffo/ecomm-api:latest  
     build:
       # context: "." means use the repo root as the Docker build context.
       # Docker sends all files from this folder (filtered by .dockerignore)
