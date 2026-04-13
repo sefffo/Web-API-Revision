@@ -16,6 +16,12 @@
     <PackageReference Include="StackExchange.Redis" Version="2.11.0" />
   </ItemGroup>
 
+	<ItemGroup>
+		<Content Include="Data\DataSeed\*.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\ECommerce.Service\ECommerce.Services.csproj" />
   </ItemGroup>

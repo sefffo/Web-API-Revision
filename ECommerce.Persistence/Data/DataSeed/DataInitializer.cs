@@ -57,7 +57,8 @@ namespace ECommerce.Persistence.Data.DataSeed
         private async Task SeedDataFromJson<TEntity, Tkey>(string fileName, DbSet<TEntity> dbset) where TEntity : BaseEntity<Tkey>
         {
             //S:\Road to full stack\BackEnd\Studying\Rev on API\EComm Aliaa tarek\ECommerceSolution\ECommerce.Persistence\Data\DataSeed\JSONFiles\
-            var filePath = @"..\ECommerce.Persistence\Data\DataSeed\JSONFiles\" + fileName;
+            //var filePath = @"..\ECommerce.Persistence\Data\DataSeed\JSONFiles\" + fileName;
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "DataSeed", fileName);
 
             if (!File.Exists(filePath)) throw new FileNotFoundException($"File {fileName} is not Found");
 
