@@ -1,107 +1,58 @@
-# Version of the Docker Compose file format.
-# 3.9 is widely supported and stable for local development.
 version: '3.9'
 
 services:
-
-  # ─────────────────────────────────────────────
-  # SERVICE 1: SQL SERVER
-  # Microsoft's official SQL Server 2022 Linux image.
-  # Both your databases (ECommRevDb + ECommRevIdentityDb) will
-  # be created inside this single SQL Server instance.
-  # ─────────────────────────────────────────────
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: ecomm_sqlserver
-
     environment:
-      SA_PASSWORD: "EComm@2026Secure!"
+      SA_PASSWORD: "YourStrong@Passw0rd"
       ACCEPT_EULA: "Y"
-
     ports:
       - "1433:1433"
-
     volumes:
-      # Named volume: persists your database files on your host machine.
-      # Without this, ALL data is lost every time you run "docker-compose down".
       - sqlserver_data:/var/opt/mssql
-
-    # ── Healthcheck ──
-    # Docker will run this command every 10s to verify SQL Server is truly
-    # ready to accept connections — not just that the container started.
-    # The API service uses "condition: service_healthy" below, which means
-    # Docker Compose will WAIT here before starting the API container.
-    # This eliminates the Error 18456 race condition on first boot.
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "/opt/mssql-tools18/bin/sqlcmd",
-          "-S", "localhost",
-          "-U", "sa",
-          "-P", "EComm@2026Secure!",
-          "-Q", "SELECT 1",
-          "-C",   # trust the self-signed certificate
-          "-b",   # exit with non-zero code on error
-        ]
-      interval: 10s      # check every 10 seconds
-      timeout: 5s        # fail the check if it takes longer than 5s
-      retries: 10        # mark unhealthy after 10 consecutive failures
-      start_period: 20s  # give SQL Server 20s to boot before checks begin
-
     networks:
       - ecomm_network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd' -Q 'SELECT 1' -No -C"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
-  # ─────────────────────────────────────────────
-  # SERVICE 2: REDIS
-  # ─────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: ecomm_redis
-
     ports:
       - "6379:6379"
-
-    # Healthcheck for Redis — much simpler, just pings it.
+    networks:
+      - ecomm_network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
 
-    networks:
-      - ecomm_network
-
-  # ─────────────────────────────────────────────
-  # SERVICE 3: YOUR API
-  # ─────────────────────────────────────────────
   api:
     build:
       context: .
       dockerfile: Dockerfile
-
     container_name: ecomm_api
-
     ports:
       - "5262:8080"
-
     environment:
-      # These override appsettings.json at runtime.
-      # ASP.NET Core maps __ (double underscore) as the hierarchy separator.
-      # We replace Windows auth + "Server=." with SQL auth + service name "sqlserver".
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ECommRevDb;User Id=sa;Password=EComm@2026Secure!;MultipleActiveResultSets=true;TrustServerCertificate=True;
-      - ConnectionStrings__IdentityConnection=Server=sqlserver;Database=ECommRevIdentityDb;User Id=sa;Password=EComm@2026Secure!;MultipleActiveResultSets=true;TrustServerCertificate=True;
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=ECommRevDb;User Id=sa;Password=YourStrong@Passw0rd;MultipleActiveResultSets=true;TrustServerCertificate=True;
+      - ConnectionStrings__IdentityConnection=Server=sqlserver,1433;Database=ECommRevIdentityDb;User Id=sa;Password=YourStrong@Passw0rd;MultipleActiveResultSets=true;TrustServerCertificate=True;
       - ConnectionStrings__RedisConnection=redis:6379
-
+      - JwtOptions__Issuer=http://localhost:5262/
+      - JwtOptions__Audience=http://localhost:5262/api
+      - JwtOptions__securityKey=738343ecdea9062836f7a086e662fbbdb73e1138
     depends_on:
-      # "condition: service_healthy" means Docker Compose will NOT start the API
-      # until both sqlserver and redis pass their healthchecks above.
-      # This is the fix for the Error 18456 race condition you saw in the logs.
       sqlserver:
         condition: service_healthy
       redis:
         condition: service_healthy
-
     networks:
       - ecomm_network
 
