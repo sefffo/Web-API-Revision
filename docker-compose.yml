@@ -1,64 +1,203 @@
+# =============================================================
+# DOCKER COMPOSE FILE
+# Orchestrates 3 containers as a single application:
+#   1. sqlserver — Microsoft SQL Server 2022 (database)
+#   2. redis     — Redis 7 (caching + basket storage)
+#   3. api       — Your ASP.NET Core 10 ECommerce API
+#
+# How to run:
+#   docker-compose up --build    ← first time (builds the API image)
+#   docker-compose up            ← subsequent runs (uses cached image)
+#   docker-compose down          ← stop and remove containers
+#   docker-compose down -v       ← also wipe the database volume
+# =============================================================
+
 version: '3.9'
 
 services:
+
+  # ===========================================================
+  # SERVICE 1: SQL SERVER
+  # Microsoft's official SQL Server 2022 image for Linux.
+  # Hosts two databases: ECommRevDb and ECommRevIdentityDb.
+  # ===========================================================
   sqlserver:
+    # Official Microsoft SQL Server 2022 image.
+    # "latest" tag always pulls the newest 2022 patch version.
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: ecomm_sqlserver
-    environment:
-      SA_PASSWORD: "YourStrong@Passw0rd"
-      ACCEPT_EULA: "Y"
-    ports:
-      - "1433:1433"
-    volumes:
-      - sqlserver_data:/var/opt/mssql
-    networks:
-      - ecomm_network
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd' -Q 'SELECT 1' -No -C"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
 
+    environment:
+      # SA (System Administrator) password.
+      # Must meet SQL Server complexity requirements:
+      # min 8 chars, uppercase, lowercase, digit, special char.
+      SA_PASSWORD: "YourStrong@Passw0rd"
+      # Mandatory: you must accept Microsoft's EULA to run this image.
+      ACCEPT_EULA: "Y"
+
+    ports:
+      # Format: "HOST_PORT:CONTAINER_PORT"
+      # Maps your machine's port 1433 to the container's port 1433.
+      # This lets you connect from SSMS on your host using localhost,1433.
+      # If you have a local SQL Server already using 1433, change to e.g. "1434:1433".
+      - "1433:1433"
+
+    volumes:
+      # Named volume: Docker manages the storage location on your host.
+      # Maps to /var/opt/mssql inside the container — where SQL Server
+      # stores all database files (.mdf, .ldf).
+      # WITHOUT this: every "docker-compose down" wipes your entire database.
+      # WITH this: data persists across restarts and rebuilds.
+      - sqlserver_data:/var/opt/mssql
+
+    networks:
+      # Attach to our custom bridge network.
+      # Containers on the same network can reach each other
+      # by service name (e.g. "sqlserver") instead of IP address.
+      - ecomm_network
+
+    healthcheck:
+      # Runs sqlcmd inside the container to execute "SELECT 1".
+      # If this succeeds, SQL Server is ready to accept connections.
+      # -S localhost  → connect to SQL Server on localhost
+      # -U sa         → login as system admin
+      # -P '...'      → password
+      # -Q 'SELECT 1' → run this query and exit
+      # -No           → no output formatting
+      # -C            → trust the server certificate (avoids SSL errors)
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd' -Q 'SELECT 1' -No -C"]
+      interval: 10s      # run the check every 10 seconds
+      timeout: 5s        # if the check takes longer than 5s, mark as failed
+      retries: 10        # mark as unhealthy after 10 consecutive failures
+      start_period: 30s  # give SQL Server 30s grace period before checks start
+                         # (SQL Server takes time to initialize on first boot)
+
+
+  # ===========================================================
+  # SERVICE 2: REDIS
+  # In-memory data store used for:
+  #   - Response caching (products, categories)
+  #   - Basket/cart storage (BasketRepository)
+  # ===========================================================
   redis:
+    # "alpine" variant = minimal Linux base image.
+    # redis:7-alpine is ~30MB vs ~100MB for the standard image.
+    # Same functionality, much smaller footprint.
     image: redis:7-alpine
     container_name: ecomm_redis
+
     ports:
+      # Maps host port 6379 to container port 6379 (Redis default).
+      # Lets you connect with Redis Desktop Manager or redis-cli from your host.
       - "6379:6379"
+
     networks:
       - ecomm_network
+
     healthcheck:
+      # "redis-cli ping" returns "PONG" when Redis is ready.
+      # Simple and reliable — if Redis responds to ping, it's healthy.
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
 
+
+  # ===========================================================
+  # SERVICE 3: API
+  # Your ASP.NET Core 10 ECommerce API.
+  # Built from the Dockerfile in the repo root.
+  # ===========================================================
   api:
     build:
+      # context: "." means use the repo root as the Docker build context.
+      # Docker sends all files from this folder (filtered by .dockerignore)
+      # to the Docker daemon to build the image.
       context: .
       dockerfile: Dockerfile
+
+    # To use a pre-built image from Docker Hub instead of building locally,
+    # comment out the build block above and uncomment the line below:
+    # image: sefffo/ecomm-api:latest
+
     container_name: ecomm_api
+
     ports:
+      # Maps host port 5262 to container port 8080.
+      # ASP.NET Core 8+ listens on port 8080 inside containers by default.
+      # Access your API at: http://localhost:5262
+      # Access Swagger at:  http://localhost:5262/swagger
       - "5262:8080"
+
     environment:
+      # ── ASP.NET Core Environment ──────────────────────────────
+      # Tells ASP.NET Core which environment it's running in.
+      # This causes it to load appsettings.Docker.json on top of appsettings.json.
+      # The Docker-specific file overrides connection strings for container networking.
       - ASPNETCORE_ENVIRONMENT=Docker
+
+      # ── Connection Strings ────────────────────────────────────
+      # ASP.NET Core reads nested JSON keys from environment variables
+      # using DOUBLE UNDERSCORE (__) as the separator.
+      # So ConnectionStrings__DefaultConnection maps to:
+      # { "ConnectionStrings": { "DefaultConnection": "..." } }
+      #
+      # IMPORTANT: "Server=sqlserver" — "sqlserver" here is NOT localhost.
+      # It's the Docker service name defined above. Inside the ecomm_network,
+      # Docker's built-in DNS resolves "sqlserver" to the container's IP.
+      # This is why containers can find each other by name, not IP address.
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=ECommRevDb;User Id=sa;Password=YourStrong@Passw0rd;MultipleActiveResultSets=true;TrustServerCertificate=True;
       - ConnectionStrings__IdentityConnection=Server=sqlserver,1433;Database=ECommRevIdentityDb;User Id=sa;Password=YourStrong@Passw0rd;MultipleActiveResultSets=true;TrustServerCertificate=True;
+
+      # "redis:6379" — same concept. "redis" is the service name above,
+      # resolved to the Redis container's IP inside ecomm_network.
       - ConnectionStrings__RedisConnection=redis:6379
+
+      # ── JWT Settings ─────────────────────────────────────────
+      # Maps to JwtOptions section in appsettings.json.
+      # JwtOptions__Issuer → { "JwtOptions": { "Issuer": "..." } }
       - JwtOptions__Issuer=http://localhost:5262/
       - JwtOptions__Audience=http://localhost:5262/api
       - JwtOptions__securityKey=738343ecdea9062836f7a086e662fbbdb73e1138
+
     depends_on:
+      # depends_on with condition: service_healthy means the api container
+      # will NOT start until both sqlserver and redis pass their healthchecks.
+      #
+      # Without this: the API starts immediately, tries to run EF Core
+      # migrations, SQL Server isn't ready yet → crash.
+      # With this: Docker waits for SQL Server to be fully initialized
+      # before even creating the API container.
       sqlserver:
         condition: service_healthy
       redis:
         condition: service_healthy
+
     networks:
       - ecomm_network
 
-volumes:
-  sqlserver_data:
 
+# =============================================================
+# VOLUMES
+# Named volumes are managed by Docker and persist on the host
+# even after containers are removed.
+# "docker-compose down" removes containers but NOT volumes.
+# "docker-compose down -v" removes containers AND volumes (data loss!).
+# =============================================================
+volumes:
+  sqlserver_data:  # stores all SQL Server database files
+
+
+# =============================================================
+# NETWORKS
+# A custom bridge network isolates our containers from other
+# Docker containers on your machine.
+#
+# Bridge network features:
+#   - Containers on the same network find each other by service name
+#   - Traffic between containers stays internal (not exposed to host)
+#   - Containers are isolated from the default Docker bridge network
+# =============================================================
 networks:
   ecomm_network:
     driver: bridge
