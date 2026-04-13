@@ -1,0 +1,132 @@
+# Version of the Docker Compose file format.
+# 3.9 is widely supported and stable for local development.
+version: '3.9'
+
+services:
+
+  # ─────────────────────────────────────────────
+  # SERVICE 1: SQL SERVER
+  # Microsoft's official SQL Server 2022 Linux image.
+  # Both your databases (ECommRevDb + ECommRevIdentityDb) will
+  # be created inside this single SQL Server instance.
+  # ─────────────────────────────────────────────
+  sqlserver:
+    # Pull this image from Docker Hub if not already cached locally.
+    image: mcr.microsoft.com/mssql/server:2022-latest
+
+    # A friendly name for the running container (shows in docker ps).
+    container_name: ecomm_sqlserver
+
+    environment:
+      # SQL Server requires a strong SA (System Administrator) password.
+      # Must be 8+ chars with uppercase, lowercase, number, and symbol.
+      SA_PASSWORD: "EComm@2026Secure!"
+
+      # Microsoft requires you to explicitly accept the EULA to run SQL Server.
+      ACCEPT_EULA: "Y"
+
+    ports:
+      # Format is "HOST_PORT:CONTAINER_PORT".
+      # Maps your machine's port 1433 to the container's port 1433.
+      # This lets you connect from SSMS on your host using localhost,1433.
+      - "1433:1433"
+
+    volumes:
+      # Named volume: persists your database files on your host machine.
+      # Without this, ALL data is lost every time you run "docker-compose down".
+      # Docker manages the storage location automatically.
+      - sqlserver_data:/var/opt/mssql
+
+    networks:
+      # Connect this container to the shared bridge network.
+      # This allows the API container to reach SQL Server by name "sqlserver".
+      - ecomm_network
+
+  # ─────────────────────────────────────────────
+  # SERVICE 2: REDIS
+  # Used by your app for caching (RedisConnection in appsettings.json).
+  # The "alpine" tag means a minimal Linux base — very small image (~30MB).
+  # ─────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: ecomm_redis
+
+    ports:
+      # Maps host port 6379 to container port 6379 (Redis default).
+      # Lets you connect with a Redis client (like RedisInsight) from your host.
+      - "6379:6379"
+
+    networks:
+      - ecomm_network
+
+  # ─────────────────────────────────────────────
+  # SERVICE 3: YOUR API
+  # This builds your ASP.NET Core app using the Dockerfile above.
+  # ─────────────────────────────────────────────
+  api:
+    build:
+      # "context: ." means Docker will use the repo root as the build context —
+      # all files in the root folder become available to the Dockerfile.
+      context: .
+
+      # Which Dockerfile to use (in case you have multiple).
+      dockerfile: Dockerfile
+
+    container_name: ecomm_api
+
+    ports:
+      # Your host's port 5262 → container's port 8080.
+      # So hitting http://localhost:5262/api/... on your machine
+      # reaches your API running on :8080 inside the container.
+      - "5262:8080"
+
+    environment:
+      # These 3 lines OVERRIDE the matching keys in appsettings.json at runtime.
+      # ASP.NET Core reads environment variables and maps __ (double underscore)
+      # as a hierarchy separator — so "ConnectionStrings__DefaultConnection"
+      # maps to appsettings.json → ConnectionStrings → DefaultConnection.
+      #
+      # WHY override? Because appsettings.json uses:
+      #   Server=.  (Windows named pipe — doesn't exist in Linux containers)
+      #   Trusted_Connection=True (Windows auth — doesn't work in Docker)
+      # We replace them with SQL auth (User Id=sa;Password=...)
+      # and point "Server" to the service name "sqlserver" instead of ".".
+      # Docker resolves service names to container IPs automatically.
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ECommRevDb;User Id=sa;Password=EComm@2026Secure!;MultipleActiveResultSets=true;TrustServerCertificate=True;
+      - ConnectionStrings__IdentityConnection=Server=sqlserver;Database=ECommRevIdentityDb;User Id=sa;Password=EComm@2026Secure!;MultipleActiveResultSets=true;TrustServerCertificate=True;
+
+      # Same idea — "localhost" doesn't point to the Redis container.
+      # We use the service name "redis" and its internal port 6379.
+      # The host-mapped port (also 6379) is only for external tools on your machine.
+      - ConnectionStrings__RedisConnection=redis:6379
+
+    depends_on:
+      # Tells Docker Compose to start sqlserver and redis BEFORE the api.
+      # Important: this only waits for the CONTAINER to start, not for SQL Server
+      # to be fully ready. SQL Server takes ~15 seconds to initialize internally.
+      # If the API crashes on first boot, run: docker-compose restart api
+      - sqlserver
+      - redis
+
+    networks:
+      - ecomm_network
+
+# ─────────────────────────────────────────────
+# VOLUMES
+# Named volumes are managed by Docker and persist on your host disk.
+# Declaring them here at the top level makes them reusable across services.
+# "sqlserver_data" survives "docker-compose down" — only deleted with
+# "docker-compose down -v" (the -v flag explicitly removes volumes).
+# ─────────────────────────────────────────────
+volumes:
+  sqlserver_data:
+
+# ─────────────────────────────────────────────
+# NETWORKS
+# A custom bridge network so all 3 containers can talk to each other
+# using service names (sqlserver, redis, api) instead of IP addresses.
+# Without this, containers are isolated and can't reach each other.
+# ─────────────────────────────────────────────
+networks:
+  ecomm_network:
+    driver: bridge

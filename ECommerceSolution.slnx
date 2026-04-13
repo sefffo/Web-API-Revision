@@ -25,6 +25,8 @@
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".env" />
+    <File Path="docker-compose.yml" />
+    <File Path="Dockerfile" />
   </Folder>
   <Project Path="ECommerce.SharedLibirary/ECommerce.SharedLibirary.csproj" />
 </Solution>
