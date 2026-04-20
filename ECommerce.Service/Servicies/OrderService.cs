@@ -103,6 +103,16 @@ namespace ECommerce.Services.Servicies
             return Result<IEnumerable<OrderToReturnDTO>>.Ok(mapper.Map<IEnumerable<OrderToReturnDTO>>(orders));
         }
 
+        public async Task<Result<IEnumerable<OrderToReturnDTO>>> GetAllOrdersForAdminAsync()
+        {
+            var orders = await unitOfWork.GetRepository<Order, Guid>().GetAllAsync();
+
+            if (!orders.Any())
+                return Error.NotFound("No orders found", "There are no orders in the system");
+
+            return Result<IEnumerable<OrderToReturnDTO>>.Ok(mapper.Map<IEnumerable<OrderToReturnDTO>>(orders));
+        }
+
         public async Task<Result<OrderToReturnDTO>> GetOrderById(Guid orderId)
         {
             var spec = new OrderSpecifications(orderId);
@@ -114,7 +124,6 @@ namespace ECommerce.Services.Servicies
             return Result<OrderToReturnDTO>.Ok(mapper.Map<OrderToReturnDTO>(order));
         }
 
-        // Called right after Fawaterak returns the invoiceId — saves it to the order row
         public async Task<bool> SaveInvoiceIdAsync(Guid orderId, string invoiceId)
         {
             var spec = new OrderSpecifications(orderId);

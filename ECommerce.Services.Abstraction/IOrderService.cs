@@ -11,6 +11,7 @@ namespace ECommerce.Services.Abstraction
         Task<Result<OrderToReturnDTO>> CreateOrderAsync(OrderDTO orderDTO, string Email);
         Task<Result<IEnumerable<DeliveryMethodDTO>>> GetDeliveryMethodsAsync();
         Task<Result<IEnumerable<OrderToReturnDTO>>> GetAllOrdersAsync(string email);
+        Task<Result<IEnumerable<OrderToReturnDTO>>> GetAllOrdersForAdminAsync();
         Task<Result<OrderToReturnDTO>> GetOrderById(Guid orderId);
 
         // payment related
