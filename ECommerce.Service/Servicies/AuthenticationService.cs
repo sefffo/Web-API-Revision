@@ -288,5 +288,21 @@ namespace ECommerce.Services.Servicies
 
             return Result<string>.Ok($"Role {assignRoleDTO.RoleName} assigned to user {assignRoleDTO.UserEmail} successfully");
         }
+
+        public async Task<Result<IEnumerable<UserDTO>>> GetAllUsersAsync()
+        {
+            var users = await userManager.Users.ToListAsync();
+            
+
+            var userDTOs = users.Select(u => new UserDTO(
+                Email: u.Email!,
+                DisplayName: u.DisplayName,
+                Token: string.Empty, // No token for listing users
+                RefreshToken: string.Empty // No refresh token for listing users
+            )).ToList();
+
+
+            return Result<IEnumerable<UserDTO>>.Ok(userDTOs);
+        }
     }
 }

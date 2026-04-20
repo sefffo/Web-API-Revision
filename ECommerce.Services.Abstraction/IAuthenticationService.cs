@@ -32,6 +32,10 @@ namespace ECommerce.Services.Abstraction
 
         Task<bool> CheckEmailAsync(string Email); //==> get it from teh token 
 
+        //get all users 
+
+        Task<Result<IEnumerable<UserDTO>>> GetAllUsersAsync();
+
         //get current user address
         Task<Result<AddressDTO>> GetUserAddressAsync(string email);
 
