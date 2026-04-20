@@ -36,6 +36,12 @@ namespace ECommerce.Services.Abstraction
 
         Task<Result<IEnumerable<UserDTO>>> GetAllUsersAsync();
 
+        // delete a user by email (SuperAdmin)
+        Task<Result<string>> DeleteUserAsync(string email);
+
+        // revoke a user's refresh token by email (SuperAdmin)
+        Task<Result<string>> RevokeRefreshTokenAsync(string email);
+
         //get current user address
         Task<Result<AddressDTO>> GetUserAddressAsync(string email);
 

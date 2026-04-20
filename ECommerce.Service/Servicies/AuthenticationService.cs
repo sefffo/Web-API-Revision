@@ -18,8 +18,6 @@ namespace ECommerce.Services.Servicies
     {
         private string GenerateRefreshToken()
         {
-            // generates a cryptographically secure random 32-byte string
-            // this is NOT a JWT — it's just a random opaque string stored in DB
             var randomBytes = new byte[32];
             using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
             rng.GetBytes(randomBytes);
@@ -178,7 +176,7 @@ namespace ECommerce.Services.Servicies
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(configuration["JwtOptions:securityKey"]!)),
-                ValidateLifetime = false // allow expired tokens here
+                ValidateLifetime = false
             };
 
             ClaimsPrincipal principal;
@@ -218,7 +216,6 @@ namespace ECommerce.Services.Servicies
 
             if (user is null)
             {
-                // --- NEW USER PATH ---
                 user = new AppUser
                 {
                     UserName = email,
@@ -237,23 +234,15 @@ namespace ECommerce.Services.Servicies
                 await userManager.AddLoginAsync(user,
                     new UserLoginInfo("Google", googleId, "Google"));
 
-                // Re-fetch from DB to get the latest ConcurrencyStamp.
-                // AddLoginAsync calls UpdateAsync internally which rotates the stamp.
-                // If we don't re-fetch, our local `user` object has a stale stamp
-                // and the UpdateAsync below will silently fail (no rows updated),
-                // leaving RefreshToken as NULL in the database.
                 user = (await userManager.FindByEmailAsync(email))!;
             }
             else
             {
-                // --- EXISTING USER PATH ---
-                // Self-heal: assign User role if missing (edge case from earlier runs)
                 var roles = await userManager.GetRolesAsync(user);
                 if (!roles.Any())
                     await userManager.AddToRoleAsync(user, "User");
             }
 
-            // At this point `user` is always fresh from DB — safe to UpdateAsync
             var refreshToken = GenerateRefreshToken();
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
@@ -292,17 +281,50 @@ namespace ECommerce.Services.Servicies
         public async Task<Result<IEnumerable<UserDTO>>> GetAllUsersAsync()
         {
             var users = await userManager.Users.ToListAsync();
-            
 
             var userDTOs = users.Select(u => new UserDTO(
                 Email: u.Email!,
                 DisplayName: u.DisplayName,
-                Token: string.Empty, // No token for listing users
-                RefreshToken: string.Empty // No refresh token for listing users
+                Token: string.Empty,
+                RefreshToken: string.Empty
             )).ToList();
 
-
             return Result<IEnumerable<UserDTO>>.Ok(userDTOs);
+        }
+
+        public async Task<Result<string>> DeleteUserAsync(string email)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return Error.NotFound("User Not Found", $"User with email {email} was not found");
+
+            var result = await userManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+                return Result<string>.Fail(
+                    result.Errors.Select(e => Error.Validation(e.Code, e.Description)).ToList());
+
+            return Result<string>.Ok($"User {email} deleted successfully");
+        }
+
+        public async Task<Result<string>> RevokeRefreshTokenAsync(string email)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return Error.NotFound("User Not Found", $"User with email {email} was not found");
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddYears(-1);
+
+            var result = await userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                return Result<string>.Fail(
+                    result.Errors.Select(e => Error.Validation(e.Code, e.Description)).ToList());
+
+            return Result<string>.Ok($"Refresh token for {email} revoked successfully");
         }
     }
 }
