@@ -1,18 +1,20 @@
-<![CDATA[<h1 align="center">🛒 ECommerce .NET Web API</h1>
+<h1 align="center">🛒 ECommerce .NET Web API</h1>
 
 <p align="center">
   A fully-featured, production-deployed RESTful E-Commerce API built with <strong>ASP.NET Core</strong>, following <strong>Clean Architecture</strong> principles.
 </p>
 
 <p align="center">
-  <a href="https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger" target="_blank">
-    <img src="https://img.shields.io/badge/Live%20API-Swagger%20UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black" />
+  <a href="https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger">
+    <img src="https://img.shields.io/badge/Live%20API-Swagger%20UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black" alt="Swagger UI" />
   </a>
-  <a href="https://hub.docker.com/repository/docker/saif31/ecomm-api/general" target="_blank">
-    <img src="https://img.shields.io/badge/Docker%20Hub-saif31%2Fecomm--api-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+  &nbsp;
+  <a href="https://hub.docker.com/repository/docker/saif31/ecomm-api/general">
+    <img src="https://img.shields.io/badge/Docker%20Hub-saif31%2Fecomm--api-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Hub" />
   </a>
-  <a href="https://github.com/sefffo/Web-API-Revision/actions" target="_blank">
-    <img src="https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" />
+  &nbsp;
+  <a href="https://github.com/sefffo/Web-API-Revision/actions">
+    <img src="https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" alt="GitHub Actions" />
   </a>
 </p>
 
@@ -57,12 +59,12 @@ This is a production-grade E-Commerce REST API built as a deep-dive revision and
 The solution follows **Clean Architecture** with strict separation of concerns across 6 layers:
 
 ```
-ECommerce.Domain                  → Entities, Interfaces, Business Rules
-ECommerce.Persistence             → EF Core DbContexts, Repositories, Migrations, Data Seeding
-ECommerce.Services.Abstraction    → Service Interfaces (contracts)
-ECommerce.Service                 → Service Implementations, AutoMapper Profiles
-ECommerce.SharedLibrary           → DTOs, Settings, Shared Models
-ECommerce.Web                     → ASP.NET Core Web API (Controllers, Middlewares, Program.cs)
+ECommerce.Domain                  →  Entities, Interfaces, Business Rules
+ECommerce.Persistence             →  EF Core DbContexts, Repositories, Migrations, Data Seeding
+ECommerce.Services.Abstraction    →  Service Interfaces (contracts)
+ECommerce.Service                 →  Service Implementations, AutoMapper Profiles
+ECommerce.SharedLibrary           →  DTOs, Settings, Shared Models
+ECommerce.Web                     →  ASP.NET Core Web API (Controllers, Middlewares, Program.cs)
 ```
 
 ### Design Patterns Used
@@ -78,6 +80,7 @@ ECommerce.Web                     → ASP.NET Core Web API (Controllers, Middlew
 ## 🛠 Tech Stack
 
 ### Backend
+
 | Technology | Purpose |
 |---|---|
 | **ASP.NET Core (.NET 10)** | Web API Framework |
@@ -90,6 +93,7 @@ ECommerce.Web                     → ASP.NET Core Web API (Controllers, Middlew
 | **Fawaterak** | Payment gateway integration |
 
 ### Infrastructure & DevOps
+
 | Technology | Purpose |
 |---|---|
 | **Azure App Service** | Cloud hosting (East Asia) |
@@ -145,11 +149,11 @@ ECommerce.Web                     → ASP.NET Core Web API (Controllers, Middlew
  ┃ ┣ 📂 Extensions
  ┃ ┣ 📂 CustomMiddleWares
  ┃ ┣ 📂 Factories
- ┃ ┗ 📄 Program.cs
+ ┃ └ 📄 Program.cs
  ┣ 📄 Dockerfile
  ┣ 📄 docker-compose.yml
  └ 📂 .github/workflows
-   └ 📄 azure-deploy.yml
+    └ 📄 azure-deploy.yml
 ```
 
 ---
@@ -157,6 +161,7 @@ ECommerce.Web                     → ASP.NET Core Web API (Controllers, Middlew
 ## 📡 API Endpoints
 
 ### 🔐 Authentication
+
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/Authentication/register` | Register new user |
@@ -165,6 +170,7 @@ ECommerce.Web                     → ASP.NET Core Web API (Controllers, Middlew
 | `POST` | `/api/Authentication/refresh-token` | Refresh JWT token |
 
 ### 🛍️ Products
+
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/Products` | Get all products (with filtering & paging) |
@@ -174,6 +180,7 @@ ECommerce.Web                     → ASP.NET Core Web API (Controllers, Middlew
 | `DELETE` | `/api/Products/{id}` | Delete product *(Admin only)* |
 
 ### 🧺 Basket
+
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/Basket/{id}` | Get customer basket |
@@ -181,6 +188,7 @@ ECommerce.Web                     → ASP.NET Core Web API (Controllers, Middlew
 | `DELETE` | `/api/Basket/{id}` | Delete basket |
 
 ### 📦 Orders
+
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/Order` | Create new order |
@@ -188,6 +196,7 @@ ECommerce.Web                     → ASP.NET Core Web API (Controllers, Middlew
 | `GET` | `/api/Order/{id}` | Get order by ID |
 
 ### 💳 Payment
+
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/Payment` | Initiate payment via Fawaterak |
@@ -202,6 +211,7 @@ ECommerce.Web                     → ASP.NET Core Web API (Controllers, Middlew
 ## 💻 Running Locally
 
 ### Prerequisites
+
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (local instance)
 - [Redis](https://redis.io/download/) (local instance or use Upstash)
@@ -258,6 +268,7 @@ This spins up the API, SQL Server, and Redis together automatically.
 The project is deployed on **Microsoft Azure** with full CI/CD via **GitHub Actions**.
 
 ### Infrastructure
+
 | Component | Service |
 |---|---|
 | **App Hosting** | Azure App Service (Free tier, East Asia) |
@@ -285,26 +296,26 @@ Live at Azure URL 🚀
 
 ## ⚙️ Environment Variables
 
-The following environment variables must be set in Azure (or your local environment):
+The following environment variables must be set in Azure (or your local `appsettings.json`):
 
 ```
-ConnectionStrings__DefaultConnection       → Azure SQL main DB connection string
-ConnectionStrings__IdentityConnection      → Azure SQL identity DB connection string
-ConnectionStrings__RedisConnection         → Upstash Redis connection string
+ConnectionStrings__DefaultConnection      →  Azure SQL main DB connection string
+ConnectionStrings__IdentityConnection     →  Azure SQL identity DB connection string
+ConnectionStrings__RedisConnection        →  Upstash Redis connection string
 
-JwtOptions__Issuer                         → API base URL
-JwtOptions__Audience                       → API audience URL
-JwtOptions__securityKey                    → JWT signing key (secret)
+JwtOptions__Issuer                        →  API base URL
+JwtOptions__Audience                      →  API audience URL
+JwtOptions__securityKey                   →  JWT signing key (secret)
 
-GoogleOAuth__ClientId                      → Google OAuth Client ID
-GoogleOAuth__ClientSecret                  → Google OAuth Client Secret
+GoogleOAuth__ClientId                     →  Google OAuth Client ID
+GoogleOAuth__ClientSecret                 →  Google OAuth Client Secret
 
-FawaterakSettings__SuccessUrl              → Payment success redirect URL
-FawaterakSettings__FailUrl                 → Payment fail redirect URL
-FawaterakSettings__PendingUrl              → Payment pending redirect URL
-FawaterakSettings__CallbackUrl             → Payment webhook callback URL
+FawaterakSettings__SuccessUrl             →  Payment success redirect URL
+FawaterakSettings__FailUrl                →  Payment fail redirect URL
+FawaterakSettings__PendingUrl             →  Payment pending redirect URL
+FawaterakSettings__CallbackUrl            →  Payment webhook callback URL
 
-URLs__BaseUrl                              → App base URL (for image serving)
+URLs__BaseUrl                             →  App base URL (for image serving)
 ```
 
 > ⚠️ Never commit real credentials to the repository. Use Azure Environment Variables or `dotnet user-secrets` locally.
@@ -340,7 +351,4 @@ The repo includes Excalidraw architecture diagrams for key concepts:
 
 ---
 
-<p align="center">
-  Built with ❤️ using ASP.NET Core · Deployed on Azure · Dockerized
-</p>
-]]>
+<p align="center">Built with ❤️ using ASP.NET Core &nbsp;·&nbsp; Deployed on Azure &nbsp;·&nbsp; Dockerized</p>
