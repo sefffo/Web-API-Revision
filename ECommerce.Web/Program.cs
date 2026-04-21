@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using System.Text;
+using System.Text.Json;
 
 namespace ECommerce.Web
 {
@@ -44,7 +45,13 @@ namespace ECommerce.Web
                         .WithOrigins(
                             "http://localhost:5173",   // Vite dev server
                             "http://localhost:3000",   // fallback
-                            "https://ecommerce-dashboard-one-tawny.vercel.app" // add when you deploy the dashboard
+                            "https://ecommerce-dashboard-one-tawny.vercel.app",
+                            "https://ecommerce-dashboard-sefffo.vercel.app",
+                            "https://ecommerce-dashboard-git-main-saifs-projects-6c87b55a.vercel.app"
+                        )
+                        .SetIsOriginMatching(origin =>
+                            origin.StartsWith("http://localhost") ||
+                            origin.EndsWith(".vercel.app")
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
@@ -210,9 +217,13 @@ namespace ECommerce.Web
 
 
 
-            builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            //builder.Services.AddOpenApi();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    // Ensure all API responses use camelCase (e.g. subTotal, userEmail, orderDate)
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+                });
 
             builder.Services.AddSwaggerGen();
 
