@@ -44,7 +44,7 @@ namespace ECommerce.Web
                         .WithOrigins(
                             "http://localhost:5173",   // Vite dev server
                             "http://localhost:3000",   // fallback
-                            "https://ecommerce-dashboard-one-tawny.vercel.app/" // add when you deploy the dashboard
+                            "https://ecommerce-dashboard-one-tawny.vercel.app" // add when you deploy the dashboard
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
