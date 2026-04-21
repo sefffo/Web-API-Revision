@@ -1,73 +1,97 @@
-﻿using ECommerce.Services.Abstraction;
-using Microsoft.AspNetCore.Hosting;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using ECommerce.Services.Abstraction;
+using ECommerce.SharedLibirary.Settings;
+using Microsoft.Extensions.Options;
 
 namespace ECommerce.Services.Servicies
 {
-    public class UploadService(IWebHostEnvironment hostEnvironment) : IUploadService
+    /// <summary>
+    /// Uploads product images to Azure Blob Storage. Replaces the old wwwroot-based
+    /// implementation because App Service's container filesystem is ephemeral — files
+    /// written under wwwroot vanish on redeploys, scale events, and restarts.
+    ///
+    /// Blob storage gives us:
+    ///  • durable storage independent of the app server lifecycle
+    ///  • a public, CDN-cacheable URL we can store directly in Product.PictureUrl
+    ///  • horizontal-scale safe (any replica can serve the same URL)
+    /// </summary>
+    public class UploadService : IUploadService
     {
-        // HashSet for O(1) lookup — built once, shared across all calls
-        // static readonly = created once at class level, not per request
+        // HashSet for O(1) extension lookup — safer than a List<string>.Contains().
         private static readonly HashSet<string> _allowedExtensions
-            = new() { ".jpg", ".jpeg", ".png", ".webp" };
+            = new(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+
+        // Maps the extensions above to the correct HTTP content-type so the browser
+        // renders the blob inline (as an image) instead of downloading it.
+        private static readonly Dictionary<string, string> _contentTypes
+            = new(StringComparer.OrdinalIgnoreCase)
+            {
+                [".jpg"] = "image/jpeg",
+                [".jpeg"] = "image/jpeg",
+                [".png"] = "image/png",
+                [".webp"] = "image/webp",
+                [".gif"] = "image/gif",
+            };
+
+        private readonly BlobContainerClient _container;
+
+        public UploadService(IOptions<AzureBlobStorageSettings> settings)
+        {
+            var cfg = settings.Value
+                ?? throw new InvalidOperationException("AzureBlobStorage settings are missing.");
+
+            if (string.IsNullOrWhiteSpace(cfg.ConnectionString))
+                throw new InvalidOperationException(
+                    "AzureBlobStorage:ConnectionString is not configured. Set it in appsettings.json or the AzureBlobStorage__ConnectionString environment variable.");
+
+            if (string.IsNullOrWhiteSpace(cfg.ContainerName))
+                throw new InvalidOperationException("AzureBlobStorage:ContainerName is not configured.");
+
+            var service = new BlobServiceClient(cfg.ConnectionString);
+            _container = service.GetBlobContainerClient(cfg.ContainerName);
+
+            // CreateIfNotExists + PublicAccessType.Blob lets anyone read individual blobs
+            // (the <img> tag in the dashboard can hit the URL without auth) but still
+            // prevents container-level listing. This is the standard pattern for public assets.
+            _container.CreateIfNotExists(PublicAccessType.Blob);
+        }
 
         public async Task<string> UploadFileAsync(Stream imageStream, string fileName)
         {
-            // ─── STEP 1: Validate wwwroot exists ────────────────────────────
-            // WebRootPath is the full disk path to wwwroot
-            // It can be null if UseStaticFiles() isn't configured in Program.cs
-            if (string.IsNullOrEmpty(hostEnvironment.WebRootPath))
-                throw new InvalidOperationException(
-                    "wwwroot is not configured. Make sure app.UseStaticFiles() is called.");
-
-            // ─── STEP 2: Validate file extension ────────────────────────────
-            // Path.GetExtension("nike.jpg") → ".jpg"
-            // ToLowerInvariant() → culture-safe lowercase (safer than ToLower())
+            // ---- 1. Validate extension ----
             var extension = Path.GetExtension(fileName).ToLowerInvariant();
-
-
-            if (imageStream.Length > 10 * 1024 * 1024) // 10MB max
-                throw new InvalidOperationException("File size cannot exceed 10MB.");
-
-            // HashSet.Contains() is O(1) — instant lookup
             if (!_allowedExtensions.Contains(extension))
                 throw new InvalidOperationException(
-                    $"File type '{extension}' is not allowed. Allowed types: jpg, jpeg, png, webp.");
+                    $"File type '{extension}' is not allowed. Allowed types: {string.Join(", ", _allowedExtensions)}.");
 
-            // ─── STEP 3: Generate unique file name ───────────────────────────
-            // Guid.NewGuid() generates a universally unique identifier
-            // "nike.jpg" → "a3f7c1d2-9b4e-4f6a-8c2d-1e5f7a9b3c4d.jpg"
-            // This prevents any file from ever overwriting another
-            var uniqueFileName = $"{Guid.NewGuid()}{extension}";
+            // ---- 2. Validate size (10 MB) ----
+            // Only trust Length when the stream supports it; multipart IFormFile streams do.
+            if (imageStream.CanSeek && imageStream.Length > 10 * 1024 * 1024)
+                throw new InvalidOperationException("File size cannot exceed 10MB.");
 
-            // ─── STEP 4: Build the folder path on disk ───────────────────────
-            // Path.Combine joins paths safely (handles slashes for you)
-            // Result: "C:\MyProject\wwwroot\images\products"
-            var uploadsFolder = Path.Combine(hostEnvironment.WebRootPath, "images", "products");
+            // ---- 3. Pick a unique blob name inside a "products/" virtual folder ----
+            // Prefixing with "products/" keeps the container tidy if we ever add other
+            // asset types (e.g. user avatars, category thumbnails).
+            var blobName = $"products/{Guid.NewGuid()}{extension}";
 
-            // ─── STEP 5: Ensure the folder exists ───────────────────────────
-            // Creates the folder (and any missing parent folders) if it doesn't exist
-            // Does nothing if it already exists — safe to call every time
-            Directory.CreateDirectory(uploadsFolder);
+            var blob = _container.GetBlobClient(blobName);
 
-            // ─── STEP 6: Build the full disk path for the new file ───────────
-            // Result: "C:\MyProject\wwwroot\images\products\{guid}.jpg"
-            // This is where the actual bytes will be written on disk
-            var fullPath = Path.Combine(uploadsFolder, uniqueFileName);
+            // ---- 4. Upload the stream ----
+            // Setting the ContentType header is what makes the browser render the URL
+            // as an image instead of triggering a download.
+            var headers = new BlobHttpHeaders
+            {
+                ContentType = _contentTypes.TryGetValue(extension, out var ct) ? ct : "application/octet-stream",
+                CacheControl = "public, max-age=31536000, immutable",
+            };
 
-            // ─── STEP 7: Write the stream bytes to disk ──────────────────────
-            // FileStream opens/creates the file at fullPath for writing
-            // FileMode.Create → creates new file, overwrites if somehow exists
-            // "await using" → async dispose, closes the file handle when done
-            // CopyToAsync → reads from imageStream and writes to fileStream async
-            await using var fileStream = new FileStream(fullPath, FileMode.Create);
-            await imageStream.CopyToAsync(fileStream);
+            await blob.UploadAsync(imageStream, new BlobUploadOptions { HttpHeaders = headers });
 
-            // ─── STEP 8: Return the relative URL ─────────────────────────────
-            // This is NOT the disk path — it's the web-accessible URL
-            // Disk:  C:\MyProject\wwwroot\images\products\{guid}.jpg
-            // URL:   /images/products/{guid}.jpg
-            // The browser uses this URL to fetch the image via static files middleware
-            return $"/images/products/{uniqueFileName}";
+            // ---- 5. Return the public URL ----
+            // blob.Uri is the fully-qualified https URL that passes the [Url] data
+            // annotation on CreateProductDto and can be rendered directly by <img>.
+            return blob.Uri.ToString();
         }
     }
 }
