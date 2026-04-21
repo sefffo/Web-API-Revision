@@ -106,12 +106,6 @@ namespace ECommerce.Web
 
 
 
-            // Bind Azure Blob Storage settings BEFORE registering UploadService,
-            // because UploadService's constructor depends on IOptions<AzureBlobStorageSettings>.
-            // Values come from appsettings.json (local) or AzureBlobStorage__* env vars (Azure App Service).
-            builder.Services.Configure<AzureBlobStorageSettings>(
-                builder.Configuration.GetSection("AzureBlobStorage"));
-
             //upload Service Registeration
             builder.Services.AddScoped<IUploadService, UploadService>();
 
