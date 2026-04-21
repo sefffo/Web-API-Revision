@@ -1,354 +1,498 @@
-<h1 align="center">🛒 ECommerce .NET Web API</h1>
+<div align="center">
 
-<p align="center">
-  A fully-featured, production-deployed RESTful E-Commerce API built with <strong>ASP.NET Core</strong>, following <strong>Clean Architecture</strong> principles.
-</p>
+# 🛒 E-Commerce REST API
 
-<p align="center">
-  <a href="https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger">
-    <img src="https://img.shields.io/badge/Live%20API-Swagger%20UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black" alt="Swagger UI" />
-  </a>
-  &nbsp;
-  <a href="https://hub.docker.com/repository/docker/saif31/ecomm-api/general">
-    <img src="https://img.shields.io/badge/Docker%20Hub-saif31%2Fecomm--api-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Hub" />
-  </a>
-  &nbsp;
-  <a href="https://github.com/sefffo/Web-API-Revision/actions">
-    <img src="https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" alt="GitHub Actions" />
-  </a>
-</p>
+### Production-grade ASP.NET Core 10 Web API — Clean Architecture, JWT Auth, Docker, Redis, Stripe & Fawaterak, Azure CI/CD
+
+[![Live API](https://img.shields.io/badge/Live%20API-Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger/index.html)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-saif31%2Fecomm--api-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/r/saif31/ecomm-api)
+[![Dashboard](https://img.shields.io/badge/Admin%20Dashboard-Live-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white)](https://ecommerce-dashboard-one-tawny.vercel.app/)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/sefffo/Web-API-Revision/actions)
+
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![C#](https://img.shields.io/badge/C%23-12.0-239120?logo=c-sharp&logoColor=white)](https://learn.microsoft.com/en-us/dotnet/csharp/)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-2022-CC2927?logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/en-us/sql-server)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)](https://redis.io/)
+[![Azure](https://img.shields.io/badge/Azure-App%20Service-0078D4?logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
+
+</div>
 
 ---
 
-## 🌐 Live Links
+## 🚀 Try It Right Now
 
-| Resource | URL |
+| Resource | Link |
 |---|---|
-| 🚀 **Live API (Swagger)** | [web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger](https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger) |
-| 🐳 **Docker Hub Image** | [hub.docker.com/r/saif31/ecomm-api](https://hub.docker.com/repository/docker/saif31/ecomm-api/general) |
-| 💼 **Portfolio** | [saif-lotfydev.vercel.app](https://saif-lotfydev.vercel.app/) |
-| 🔗 **LinkedIn** | [linkedin.com/in/saif-lotfy](https://www.linkedin.com/in/saif-lotfy-769451310/) |
+| 🎛️ **Admin Dashboard** | <https://ecommerce-dashboard-one-tawny.vercel.app/> |
+| 📖 **Live API + Swagger** | <https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger/index.html> |
+| 🐳 **Docker Image** | <https://hub.docker.com/r/saif31/ecomm-api> — `docker pull saif31/ecomm-api:latest` |
+| 💻 **Frontend Repo** | <https://github.com/sefffo/ecommerce-dashboard> |
 
----
-
-## 📋 Table of Contents
-
-- [About the Project](#-about-the-project)
-- [Architecture](#-architecture)
-- [Tech Stack](#-tech-stack)
-- [Features](#-features)
-- [Project Structure](#-project-structure)
-- [API Endpoints](#-api-endpoints)
-- [Running Locally](#-running-locally)
-- [Running with Docker](#-running-with-docker)
-- [Deployment](#-deployment)
-- [Environment Variables](#-environment-variables)
-- [Design Diagrams](#-design-diagrams)
-- [Author](#-author)
-
----
-
-## 📖 About the Project
-
-This is a production-grade E-Commerce REST API built as a deep-dive revision and learning project. It covers advanced backend concepts including Clean Architecture, the Repository & Unit of Work patterns, JWT Authentication, Google OAuth, Redis caching, payment gateway integration, and full cloud deployment on Microsoft Azure with CI/CD via GitHub Actions.
-
----
-
-## 🏗 Architecture
-
-The solution follows **Clean Architecture** with strict separation of concerns across 6 layers:
+### 🔑 Demo Credentials (SuperAdmin)
 
 ```
-ECommerce.Domain                  →  Entities, Interfaces, Business Rules
-ECommerce.Persistence             →  EF Core DbContexts, Repositories, Migrations, Data Seeding
-ECommerce.Services.Abstraction    →  Service Interfaces (contracts)
-ECommerce.Service                 →  Service Implementations, AutoMapper Profiles
-ECommerce.SharedLibrary           →  DTOs, Settings, Shared Models
-ECommerce.Web                     →  ASP.NET Core Web API (Controllers, Middlewares, Program.cs)
+Email:    superadmin@ecommerce.com
+Password: SuperAdmin@123
 ```
 
-### Design Patterns Used
-
-- ✅ **Repository Pattern** — abstracts data access logic
-- ✅ **Unit of Work Pattern** — manages transactions across multiple repositories
-- ✅ **Specification Pattern** — encapsulates query logic (filtering, sorting, paging)
-- ✅ **Result Pattern** — consistent API response wrapping
-- ✅ **Factory Pattern** — custom API validation responses
+Log in at the dashboard URL above — you get full access to manage orders, products, brands, types, users, and roles.
 
 ---
 
-## 🛠 Tech Stack
+## 📑 Table of Contents
 
-### Backend
+1. [Overview](#-overview)
+2. [Architecture](#-architecture--clean-architecture--onion)
+3. [Design Patterns](#-design-patterns-used)
+4. [Tech Stack](#-tech-stack)
+5. [Features](#-features)
+6. [Project Structure](#-project-structure)
+7. [Authentication & Authorization](#-authentication--authorization)
+8. [Caching Strategy](#-caching-strategy)
+9. [Payments](#-payments)
+10. [Running Locally](#-running-locally)
+11. [Docker Deployment](#-docker-deployment)
+12. [CI/CD Pipeline](#-cicd-pipeline)
+13. [API Reference](#-api-reference)
+14. [Dashboard Preview](#-dashboard-preview)
+15. [What I Learned](#-what-i-learned)
 
-| Technology | Purpose |
+---
+
+## 📖 Overview
+
+A full-featured e-commerce backend built from the ground up with production concerns in mind — **not a tutorial clone**. Every architectural decision was made deliberately: from module boundaries, to caching invalidation, to refresh-token rotation, to multi-stage Docker builds.
+
+- **7 independent projects** organized by Clean Architecture rings (Domain → Application → Infrastructure → Presentation)
+- **2 EF Core DbContexts** — one for business data, one for ASP.NET Identity (separation of concerns)
+- **JWT + refresh tokens** with rotation & revocation
+- **Role-based authorization** (`SuperAdmin`, `Admin`, `User`)
+- **Redis caching** with automatic invalidation on mutation
+- **Stripe + Fawaterak** payment integrations
+- **Containerized** with a multi-stage Dockerfile + `docker-compose.yml`
+- **Continuously deployed** to Azure App Service via GitHub Actions
+
+---
+
+## 🏗️ Architecture — Clean Architecture / Onion
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                  ECommerce.Web (Host)                    │ ← Program.cs, middleware, DI wiring
+│  CORS · JWT · Swagger · Global exception handler         │
+├──────────────────────────────────────────────────────────┤
+│            ECommerce.Presentation (Controllers)          │ ← HTTP boundary, zero business logic
+│  Authentication · Products · Orders · Basket · Payment   │
+├──────────────────────────────────────────────────────────┤
+│  ECommerce.Services + ECommerce.Services.Abstraction     │ ← Application layer (use cases)
+│  AuthService · ProductService · OrderService · …         │
+├──────────────────────────────────────────────────────────┤
+│               ECommerce.Persistence                      │ ← EF Core, repositories, seed data
+│  StoreDbContext · IdentityDbContext · Specs Evaluator    │
+├──────────────────────────────────────────────────────────┤
+│                  ECommerce.Domain                        │ ← Pure C#, no dependencies
+│  Entities · Interfaces · Specifications base             │
+├──────────────────────────────────────────────────────────┤
+│                ECommerce.SharedLibrary                   │ ← Cross-cutting: DTOs, Result<T>,
+│  DTOs · Result<T> · PaginatedResult<T> · Settings        │   pagination, options classes
+└──────────────────────────────────────────────────────────┘
+```
+
+**Dependency rule:** every arrow points inward. `Domain` knows nothing about EF Core, ASP.NET, or Redis. Swap Redis for Memcached tomorrow — only `Persistence` / `Services` change.
+
+---
+
+## 🎨 Design Patterns Used
+
+| Pattern | Where | Why |
+|---|---|---|
+| **Repository** | `ECommerce.Persistence/Repositories` | Abstracts EF Core away from services; each aggregate has a dedicated repo |
+| **Unit of Work** | `IUnitOfWork` + `UnitOfWork.cs` | Single `SaveChangesAsync()` across multiple repos — atomic writes |
+| **Specification** | `ECommerce.Domain/Specifications` + `SpecificationsEvaluator` | Reusable query logic (filtering / sorting / paging / includes) — no LINQ in services |
+| **Result Pattern** | `ECommerce.SharedLibrary.CommonResult.Result<T>` | Explicit success/failure instead of exceptions for control flow |
+| **DTO / AutoMapper** | `MappingProfiles/` | Never leak entities to the API surface |
+| **Factory** | `ECommerce.Web/Factories` | Custom validation error responses for ModelState |
+| **Middleware** | `CustomMiddleWares/ExceptionHandlerMiddleWare` | Centralized error handling → consistent `ProblemDetails` |
+| **Options Pattern** | `JwtOptions`, `StripeSettings` | Strongly-typed configuration binding |
+| **Dependency Injection** | `WebAppRegistrations` extension | Clean DI composition via `IServiceCollection` extensions |
+
+---
+
+## 🧰 Tech Stack
+
+<div align="center">
+
+| Layer | Technology |
 |---|---|
-| **ASP.NET Core (.NET 10)** | Web API Framework |
-| **Entity Framework Core** | ORM for SQL Server |
-| **ASP.NET Core Identity** | User management & roles |
-| **StackExchange.Redis** | Basket & caching (via Upstash) |
-| **AutoMapper** | Object-to-object mapping |
-| **JWT Bearer** | Token-based authentication |
-| **Google OAuth 2.0** | External authentication |
-| **Fawaterak** | Payment gateway integration |
+| **Runtime** | ASP.NET Core 10 · C# 12 |
+| **Data** | Entity Framework Core 10 · SQL Server 2022 |
+| **Cache** | Redis 7 (StackExchange.Redis) |
+| **Auth** | ASP.NET Identity · JWT · Refresh Tokens |
+| **Payments** | Stripe · Fawaterak |
+| **Validation** | FluentValidation / Data Annotations |
+| **Mapping** | AutoMapper |
+| **Docs** | Swashbuckle (Swagger) |
+| **Container** | Docker (multi-stage) + Docker Compose |
+| **Cloud** | Azure App Service (East Asia) |
+| **CI/CD** | GitHub Actions |
 
-### Infrastructure & DevOps
-
-| Technology | Purpose |
-|---|---|
-| **Azure App Service** | Cloud hosting (East Asia) |
-| **Azure SQL Server** | Production database |
-| **Upstash Redis** | Managed Redis (free tier) |
-| **Docker** | Containerization |
-| **GitHub Actions** | CI/CD pipeline |
-| **Swagger / OpenAPI** | API documentation |
+</div>
 
 ---
 
 ## ✨ Features
 
-- 🔐 **JWT Authentication** with refresh tokens
-- 🔑 **Google OAuth 2.0** external login
-- 👤 **Role-based authorization** (Admin / User)
-- 🛍️ **Product management** with image upload support
-- 🧺 **Shopping basket** powered by Redis (TTL-based expiry)
-- 📦 **Order management** with full order lifecycle
-- 💳 **Payment integration** via Fawaterak gateway
-- ⚡ **Response caching** with Redis
-- 📄 **Pagination, Filtering & Sorting** via Specification Pattern
-- 🌱 **Auto database migrations & seeding** on startup
-- 🐳 **Dockerized** with Docker Compose support
-- 🚀 **CI/CD** — auto deploys to Azure on every push to `master`
-
----
-
-## 📁 Project Structure
-
-```
-📦 ECommerceSolution
- ┣ 📂 ECommerce.Domain
- ┃ ┣ 📂 Entities
- ┃ ┃ ┣ 📂 ProductModule
- ┃ ┃ ┣ 📂 OrderModule
- ┃ ┃ ┣ 📂 BasketModule
- ┃ ┃ └ 📂 IdentityModule
- ┃ └ 📂 Interfaces
- ┣ 📂 ECommerce.Persistence
- ┃ ┣ 📂 Data
- ┃ ┃ ┣ 📂 DbContexts
- ┃ ┃ ┣ 📂 DataSeed
- ┃ ┃ └ 📂 IdentityData
- ┃ └ 📂 Repositories
- ┣ 📂 ECommerce.Services.Abstraction
- ┣ 📂 ECommerce.Service
- ┃ ┣ 📂 Services
- ┃ └ 📂 MappingProfiles
- ┣ 📂 ECommerce.SharedLibrary
- ┣ 📂 ECommerce.Web
- ┃ ┣ 📂 Controllers
- ┃ ┣ 📂 Extensions
- ┃ ┣ 📂 CustomMiddleWares
- ┃ ┣ 📂 Factories
- ┃ └ 📄 Program.cs
- ┣ 📄 Dockerfile
- ┣ 📄 docker-compose.yml
- └ 📂 .github/workflows
-    └ 📄 azure-deploy.yml
-```
-
----
-
-## 📡 API Endpoints
-
-### 🔐 Authentication
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/Authentication/register` | Register new user |
-| `POST` | `/api/Authentication/login` | Login with JWT response |
-| `GET` | `/api/Authentication/google-login` | Initiate Google OAuth |
-| `POST` | `/api/Authentication/refresh-token` | Refresh JWT token |
+### 🔐 Identity & Auth
+- Register / Login with JWT access tokens
+- **Refresh-token rotation** — old token invalidated on every refresh
+- **Revoke endpoint** — logs user out on all devices instantly
+- Role management: `SuperAdmin` > `Admin` > `User`
+- `[Authorize(Roles = "Admin,SuperAdmin")]` on protected endpoints
+- Google OAuth hooks (see `AuthenticationController`)
 
 ### 🛍️ Products
+- Paginated search (by name) + filter (brand, type) + sort
+- Admin-only create / (soft)-delete
+- Image upload endpoint with server-side validation
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/Products` | Get all products (with filtering & paging) |
-| `GET` | `/api/Products/{id}` | Get product by ID |
-| `POST` | `/api/Products` | Create product *(Admin only)* |
-| `PUT` | `/api/Products/{id}` | Update product *(Admin only)* |
-| `DELETE` | `/api/Products/{id}` | Delete product *(Admin only)* |
-
-### 🧺 Basket
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/Basket/{id}` | Get customer basket |
-| `POST` | `/api/Basket` | Create or update basket |
-| `DELETE` | `/api/Basket/{id}` | Delete basket |
+### 🛒 Basket
+- **Redis-backed** basket (TTL-based, no DB bloat)
+- One basket per authenticated user
+- Survives page reloads; cleared on successful order
 
 ### 📦 Orders
+- Checkout: basket → address → delivery method → payment
+- **9-state status machine** (Pending → Processing → PaymentPending → PaymentReceived → Paid → Preparing → Shipped → Delivered; or Cancelled)
+- PATCH endpoint for admin status updates with role gate
+- Order history per user + admin "all orders" view
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/Order` | Create new order |
-| `GET` | `/api/Order` | Get user orders |
-| `GET` | `/api/Order/{id}` | Get order by ID |
+### 💳 Payments
+- Stripe integration via webhooks
+- Fawaterak integration (Egypt) — PDF integration guide included in repo
+- Payment confirmation updates order status automatically
 
-### 💳 Payment
+### ⚡ Performance
+- Redis response caching on read-heavy endpoints (products, brands, types)
+- **Cache-key invalidation** on create/update/delete — no stale data
+- JsonSerializer configured once with camelCase policy so cache hits match fresh responses
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/Payment` | Initiate payment via Fawaterak |
-| `GET` | `/api/Payment/success` | Payment success callback |
-| `GET` | `/api/Payment/fail` | Payment failure callback |
-| `POST` | `/api/Payment/callback` | Webhook callback |
-
-> 📄 Full interactive docs available at the **[Live Swagger UI](https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger)**
+### 🧱 Robustness
+- Global exception middleware → consistent JSON error shape
+- `Result<T>` pattern avoids throwing for expected failures (validation, 404, 403)
+- Structured logging at every service boundary
 
 ---
 
-## 💻 Running Locally
+## 📂 Project Structure
 
-### Prerequisites
-
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (local instance)
-- [Redis](https://redis.io/download/) (local instance or use Upstash)
-
-### Steps
-
-```bash
-# 1. Clone the repo
-git clone https://github.com/sefffo/Web-API-Revision.git
-cd Web-API-Revision
-
-# 2. Update appsettings.json with your local connection strings
-# DefaultConnection, IdentityConnection, RedisConnection
-
-# 3. Restore & Run
-dotnet restore
-dotnet run --project ECommerce.Web/ECommerce.Web.csproj
+```
+Web-API-Revision/
+├── ECommerce.Domain/                    # Pure entities + interfaces
+│   ├── Entities/
+│   │   ├── IdentityModule/              # User, RefreshToken
+│   │   ├── ProductModule/               # Product, Brand, Type
+│   │   ├── OrderModule/                 # Order, OrderItem, DeliveryMethod, OrderStatus
+│   │   └── BasketModule/                # CustomerBasket, BasketItem
+│   └── Interfaces/                       # IUnitOfWork, IGenericRepository<T>, ISpecifications<T>
+│
+├── ECommerce.Persistence/               # EF Core + Identity + Redis adapters
+│   ├── Data/DbContexts/                 # StoreDbContext, IdentityDbContext
+│   ├── Repositories/                    # GenericRepository, BasketRepository (Redis)
+│   ├── SpecificationsEvaluator.cs       # Applies specs to IQueryable
+│   └── Data/DataSeed/                   # Seed products, roles, super-admin
+│
+├── ECommerce.Services.Abstraction/       # Service interfaces (DI contracts)
+├── ECommerce.Services/                  # Application layer
+│   ├── AuthenticationService.cs
+│   ├── ProductService.cs
+│   ├── OrderService.cs                  # Status state-machine lives here
+│   ├── BasketService.cs
+│   ├── CacheService.cs                  # Redis wrapper + JSON options
+│   ├── UploadService.cs
+│   ├── Payment Service/                 # StripeService, FawaterakService
+│   ├── MappingProfiles/                 # AutoMapper
+│   └── Specifications/                  # Query specs
+│
+├── ECommerce.Presentation/              # Thin controllers (HTTP only)
+│   └── Controllers/
+│       ├── AuthenticationController.cs
+│       ├── ProductsController.cs
+│       ├── OrderController.cs
+│       ├── BasketController.cs
+│       ├── PaymentController.cs
+│       └── UploadController.cs
+│
+├── ECommerce.SharedLibrary/             # Cross-cutting (DTOs, Result<T>, Settings)
+├── ECommerce.Web/                       # Host project
+│   ├── Program.cs
+│   ├── Extensions/WebAppRegistrations.cs
+│   ├── CustomMiddleWares/ExceptionHandlerMiddleWare.cs
+│   ├── Factories/                       # ModelState error factory
+│   └── appsettings{.Docker,.Development}.json
+│
+├── Dockerfile                           # Multi-stage (SDK → runtime)
+├── docker-compose.yml                   # API + SQL Server 2022 + Redis 7
+└── .github/workflows/azure-deploy.yml   # CI → Azure App Service
 ```
 
-The app will automatically run migrations and seed the database on first startup.
+---
 
-Open Swagger at: `http://localhost:5262/swagger`
+## 🔒 Authentication & Authorization
+
+**Access + refresh token flow**
+
+```
+┌──────────┐                         ┌─────────────┐
+│  Client  │  POST /login            │    API      │
+│          │ ───────────────────▶    │             │
+│          │   access (15m)          │             │
+│          │   refresh (7d)          │             │
+│          │ ◀───────────────────    │             │
+│          │                         │             │
+│          │  requests with Bearer   │             │
+│          │ ───────────────────▶    │             │
+│          │                         │             │
+│          │  when access expires:   │             │
+│          │  POST /refresh-token    │             │
+│          │ ───────────────────▶    │             │
+│          │   NEW access + NEW refresh            │
+│          │   (old refresh revoked) │             │
+│          │ ◀───────────────────    │             │
+└──────────┘                         └─────────────┘
+```
+
+- Every refresh returns a **fresh pair** and invalidates the previous refresh token.
+- `POST /Authentication/revoke-token/{email}` instantly signs a user out everywhere (admin power).
+- Roles are encoded as claims inside the JWT — no extra DB round-trip per request.
 
 ---
 
-## 🐳 Running with Docker
+## ⚡ Caching Strategy
 
-### Option 1 — Pull from Docker Hub
+```
+         ┌──────────────────────┐
+         │   GET /api/Products  │
+         └──────────┬───────────┘
+                    │
+           ┌────────▼────────┐
+           │   Redis hit?    │
+           └────┬──────┬─────┘
+              yes      no
+               │        │
+       ┌───────▼──┐  ┌──▼────────────────┐
+       │ Return   │  │ Query SQL Server  │
+       │ cached   │  │ (Specifications)  │
+       │ JSON     │  │                   │
+       └──────────┘  │ Serialize w/      │
+                     │ camelCase policy  │
+                     │ SET with TTL      │
+                     └────────┬──────────┘
+                              ▼
+                        return JSON
+```
+
+**Invalidation:** on `POST/PUT/PATCH/DELETE`, the affected cache keys (e.g. `products:all`, `products:{id}`, `order:{id}`) are explicitly evicted — no "wait-for-TTL-to-expire" bugs.
+
+---
+
+## 💳 Payments
+
+- **Stripe** — card payments via `PaymentIntent` API. Webhooks update the order status to `PaymentReceived`.
+- **Fawaterak** — Egyptian payment gateway. Integration guide PDF included in the repo (`fawaterak-integration-guide.pdf`).
+
+Both live behind `IPaymentService` so the controller doesn't care which one ran.
+
+---
+
+## 🏃 Running Locally
+
+### Prerequisites
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- Docker Desktop (for SQL Server + Redis)
+
+### Option A — Docker Compose (easiest)
+
+```bash
+git clone https://github.com/sefffo/Web-API-Revision.git
+cd Web-API-Revision
+docker-compose up --build
+```
+
+→ Swagger opens at **http://localhost:5262/swagger**
+
+This spins up **SQL Server 2022 + Redis 7 + the API** on a private Docker network with health-checks gating startup order.
+
+### Option B — Native dotnet + local SQL Server
+
+```bash
+dotnet restore
+dotnet ef database update --project ECommerce.Persistence --startup-project ECommerce.Web
+dotnet run --project ECommerce.Web
+```
+
+Configure `appsettings.Development.json` with your local connection strings first.
+
+---
+
+## 🐳 Docker Deployment
+
+**Image:** [`saif31/ecomm-api:latest`](https://hub.docker.com/r/saif31/ecomm-api) (published to Docker Hub)
+
+### Multi-stage Dockerfile — how & why
+
+```dockerfile
+# Stage 1: SDK image (~800MB) — compiles the code
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Trick: copy .csproj files FIRST, restore, THEN copy source.
+# Result: changing a .cs file reuses the cached restore layer → 10× faster rebuilds.
+COPY *.slnx .
+COPY */*.csproj ./
+RUN dotnet restore
+
+COPY . .
+RUN dotnet publish ECommerce.Web/ECommerce.Web.csproj -c Release -o /app/publish --no-restore
+
+# Stage 2: Runtime image (~220MB) — only what's needed to RUN
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "ECommerce.Web.dll"]
+```
+
+- **Final image ≈ 220 MB** instead of ~800 MB — no SDK, no source code, no NuGet cache leaks
+- Layer-cached restore = seconds-fast rebuilds on code-only changes
+- Runs as PID 1 (exec form) so SIGTERM triggers graceful shutdown
+
+### Run the published image anywhere
 
 ```bash
 docker pull saif31/ecomm-api:latest
-docker run -p 8080:8080 saif31/ecomm-api:latest
+docker run -p 5262:8080 \
+  -e ConnectionStrings__DefaultConnection="..." \
+  -e ConnectionStrings__RedisConnection="..." \
+  -e JwtOptions__securityKey="..." \
+  saif31/ecomm-api:latest
 ```
-
-🐳 Docker Hub: [hub.docker.com/r/saif31/ecomm-api](https://hub.docker.com/repository/docker/saif31/ecomm-api/general)
-
-### Option 2 — Docker Compose (Full Stack)
-
-```bash
-# Clone the repo
-git clone https://github.com/sefffo/Web-API-Revision.git
-cd Web-API-Revision
-
-# Start all services (API + SQL Server + Redis)
-docker compose up --build
-```
-
-This spins up the API, SQL Server, and Redis together automatically.
 
 ---
 
-## 🚀 Deployment
+## 🔁 CI/CD Pipeline
 
-The project is deployed on **Microsoft Azure** with full CI/CD via **GitHub Actions**.
+**File:** [`.github/workflows/azure-deploy.yml`](.github/workflows/azure-deploy.yml)
 
-### Infrastructure
+```
+┌───────────────────────────────────────────────────────────────┐
+│  git push origin master                                       │
+└──────────────┬────────────────────────────────────────────────┘
+               ▼
+┌──────────────────────────────┐       ┌──────────────────────┐
+│   GitHub Actions Runner      │       │   Azure App Service  │
+│                              │       │   Web-API-Revesion   │
+│  1. Checkout                 │       │   (East Asia)        │
+│  2. Setup .NET 10 SDK        │       │                      │
+│  3. dotnet restore           │       │  Receives: /publish  │
+│  4. dotnet build -c Release  │       │  Zero-downtime swap  │
+│  5. dotnet publish           │ ───▶  │  Live in ~45s        │
+│  6. azure/webapps-deploy@v3  │       │                      │
+└──────────────────────────────┘       └──────────────────────┘
+```
 
-| Component | Service |
+- **Trigger:** `push` to `master` + manual `workflow_dispatch`
+- **Secret:** `AZURE_WEBAPP_PUBLISH_PROFILE` stored in GitHub repo secrets
+- **Deploy target:** `Web-API-Revesion` on Azure App Service
+- **Deploy time:** ~90 seconds end-to-end
+
+---
+
+## 📖 API Reference
+
+Full interactive docs at the **[Swagger UI](https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger/index.html)**. Highlights:
+
+### Authentication
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/Authentication/Register` | Create account |
+| POST | `/api/Authentication/Login` | Returns access + refresh tokens |
+| POST | `/api/Authentication/RefreshToken` | Rotate tokens |
+| POST | `/api/Authentication/revoke-token/{email}` | Sign user out (Admin) |
+| POST | `/api/Authentication/AssignRole` | Change user role (SuperAdmin) |
+| GET  | `/api/Authentication/CurrentUser` | Me + role |
+| GET  | `/api/Authentication/users` | List users (Admin) |
+
+### Products
+| Method | Endpoint | Description |
+|---|---|---|
+| GET  | `/api/Products` | Paginated, filterable, sortable |
+| GET  | `/api/Products/{id}` | By id |
+| GET  | `/api/Products/brands` / `/types` | Taxonomies |
+| POST | `/api/Products` | Create (Admin) |
+
+### Orders
+| Method | Endpoint | Description |
+|---|---|---|
+| POST  | `/api/Order` | Checkout |
+| GET   | `/api/Order/{id}` | Detail |
+| GET   | `/api/Order/Admin/AllOrders` | Admin list |
+| PATCH | `/api/Order/{orderId}/status` | Admin status update |
+
+### Basket
+| Method | Endpoint |
 |---|---|
-| **App Hosting** | Azure App Service (Free tier, East Asia) |
-| **Database** | Azure SQL Server — 2 databases (Free tier) |
-| **Cache / Basket** | Upstash Redis (Free tier, managed) |
-| **CI/CD** | GitHub Actions → auto deploy on push to `master` |
-
-### Deployment Flow
-
-```
-Push to master
-     ↓
-GitHub Actions triggered
-     ↓
-Ubuntu VM: Restore → Build → Publish
-     ↓
-Deploy to Azure App Service
-     ↓
-App starts → Auto-migrate DBs → Seed data
-     ↓
-Live at Azure URL 🚀
-```
+| GET/POST/DELETE | `/api/Basket/{id}` |
 
 ---
 
-## ⚙️ Environment Variables
+## 🖼️ Dashboard Preview
 
-The following environment variables must be set in Azure (or your local `appsettings.json`):
+The React admin dashboard consumes this API:
 
-```
-ConnectionStrings__DefaultConnection      →  Azure SQL main DB connection string
-ConnectionStrings__IdentityConnection     →  Azure SQL identity DB connection string
-ConnectionStrings__RedisConnection        →  Upstash Redis connection string
+| Page | Desktop | Mobile |
+|---|---|---|
+| Overview (KPIs + chart) | ✅ | ✅ |
+| Orders (table → cards) | ✅ | ✅ |
+| Order Detail (status machine) | ✅ | ✅ |
+| Products (image grid) | ✅ | ✅ |
+| Users (role management) | ✅ | ✅ |
 
-JwtOptions__Issuer                        →  API base URL
-JwtOptions__Audience                      →  API audience URL
-JwtOptions__securityKey                   →  JWT signing key (secret)
+**Try it:** <https://ecommerce-dashboard-one-tawny.vercel.app/> with `superadmin@ecommerce.com` / `SuperAdmin@123`.
 
-GoogleOAuth__ClientId                     →  Google OAuth Client ID
-GoogleOAuth__ClientSecret                 →  Google OAuth Client Secret
-
-FawaterakSettings__SuccessUrl             →  Payment success redirect URL
-FawaterakSettings__FailUrl                →  Payment fail redirect URL
-FawaterakSettings__PendingUrl             →  Payment pending redirect URL
-FawaterakSettings__CallbackUrl            →  Payment webhook callback URL
-
-URLs__BaseUrl                             →  App base URL (for image serving)
-```
-
-> ⚠️ Never commit real credentials to the repository. Use Azure Environment Variables or `dotnet user-secrets` locally.
+Frontend repo: <https://github.com/sefffo/ecommerce-dashboard>
 
 ---
 
-## 🎨 Design Diagrams
+## 🎓 What I Learned
 
-The repo includes Excalidraw architecture diagrams for key concepts:
+This project was my deep-dive into **production software engineering**, not tutorials:
 
-| Diagram | Description |
+| Area | Takeaway |
 |---|---|
-| `JWT Auth.excalidraw.png` | JWT authentication flow |
-| `Identity Module.excalidraw.png` | ASP.NET Identity setup |
-| `OAuth Steps.excalidraw.png` | Google OAuth 2.0 flow |
-| `ExplainningRefreshToken.excalidraw.png` | Refresh token lifecycle |
-| `Specification design pattern.excalidraw.png` | Specification pattern explained |
-| `ResultPattern.excalidraw.png` | Result pattern for API responses |
-| `Adding Create Product Endpoint for admin.excalidraw.png` | Admin product endpoint flow |
+| **Clean Architecture** | Why rings matter — swapping SQL Server or Redis would touch 1 project, not 7 |
+| **Specifications** | Keeping LINQ out of services makes query logic testable and composable |
+| **Result pattern** | Exceptions are for *exceptional* cases; business failures (validation / 404 / 403) are values |
+| **Token rotation** | Security isn't just "use JWT" — it's rotation, revocation, and clock-skew handling |
+| **Cache invalidation** | "One of the two hard problems in CS" — solved here with explicit key eviction on every write |
+| **JSON casing bug** | Hit a real production bug where cached Pascal-case JSON leaked through; fixed at the serializer layer |
+| **Docker multi-stage** | 72% smaller final image + faster rebuilds via layer caching trick |
+| **docker-compose health-checks** | `depends_on: service_healthy` prevents "DB not ready" race conditions |
+| **Azure App Service** | Remote publish profile → GitHub Actions → zero-downtime deploy |
+| **CORS** | `AllowCredentials()` requires explicit origin predicates (can't use `AllowAnyOrigin`) |
+| **SignalR of DI** | Extension methods on `IServiceCollection` keep `Program.cs` readable at 7 projects' worth of registrations |
 
 ---
 
-## 👨‍💻 Author
+<div align="center">
 
-**Saif Lotfy** — Backend Engineer & Student
+### 🔗 Related
 
-| | |
-|---|---|
-| 🌐 **Portfolio** | [saif-lotfydev.vercel.app](https://saif-lotfydev.vercel.app/) |
-| 💼 **LinkedIn** | [linkedin.com/in/saif-lotfy](https://www.linkedin.com/in/saif-lotfy-769451310/) |
-| 📧 **Email** | [saiflotfy26@gmail.com](mailto:saiflotfy26@gmail.com) |
-| 📱 **Phone** | +20 1277934002 |
+[**Frontend (React Dashboard)**](https://github.com/sefffo/ecommerce-dashboard) · [**Docker Hub**](https://hub.docker.com/r/saif31/ecomm-api) · [**Live Swagger**](https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger/index.html) · [**Live Dashboard**](https://ecommerce-dashboard-one-tawny.vercel.app/)
 
 ---
 
-<p align="center">Built with ❤️ using ASP.NET Core &nbsp;·&nbsp; Deployed on Azure &nbsp;·&nbsp; Dockerized</p>
+**Built by [Saif Lotfy](https://www.linkedin.com/in/saif-lotfy-769451310/)** — backend engineer, Cairo 🇪🇬
+
+*If this project helped you, a ⭐ on the repo would mean the world.*
+
+</div>
