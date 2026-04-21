@@ -21,8 +21,13 @@ namespace ECommerce.Presentation.Controllers
             if (result.isSuccess)
             {
                 var cacheService = HttpContext.RequestServices.GetRequiredService<ICacheService>();
-                var cacheKey = $"/api/Order/AllOrders|user-{email}";
-                try { await cacheService.RemoveAsync(cacheKey); } catch { }
+                try
+                {
+                    // invalidate this user's own orders list + every admin's "all orders" view
+                    await cacheService.RemoveAsync($"/api/Order/AllOrders|user-{email}");
+                    await cacheService.RemoveByPatternAsync("/api/Order/Admin/AllOrders*");
+                }
+                catch { /* cache eviction failures must never break the write */ }
             }
 
             return HandleResult(result);
@@ -80,14 +85,16 @@ namespace ECommerce.Presentation.Controllers
 
             if (result.isSuccess)
             {
-                // best-effort cache invalidation — cached entries are per-user so we
-                // only have a guaranteed key for admin listings; per-user listings and
-                // by-id caches will expire via TTL (60m) or be refreshed on next write.
+                // Cache keys are built by RedisCacheAttribute as "{path}|user-{email}" (plus any query
+                // string parts). Single-key removal misses every admin's cached copy, which is exactly
+                // why the dashboard appeared "stuck on Preparing" after a PATCH. Pattern-based eviction
+                // scans every matching Redis key and deletes all variants across users at once.
                 var cacheService = HttpContext.RequestServices.GetRequiredService<ICacheService>();
                 try
                 {
-                    await cacheService.RemoveAsync("/api/Order/Admin/AllOrders");
-                    await cacheService.RemoveAsync($"/api/Order/{orderId}");
+                    await cacheService.RemoveByPatternAsync("/api/Order/Admin/AllOrders*");
+                    await cacheService.RemoveByPatternAsync("/api/Order/AllOrders*");
+                    await cacheService.RemoveByPatternAsync($"/api/Order/{orderId}*");
                 }
                 catch { /* swallow — cache eviction failures must not break the update */ }
             }

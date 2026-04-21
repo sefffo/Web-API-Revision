@@ -37,5 +37,10 @@ namespace ECommerce.Services.Servicies
         {
             await repository.RemoveAsync(cacheKey);
         }
+
+        public async Task RemoveByPatternAsync(string pattern)
+        {
+            await repository.RemoveByPatternAsync(pattern);
+        }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 
 
@@ -75,6 +76,9 @@ namespace ECommerce.Presentation.Controllers
             {
                 return HandleResult<BrandDto>(createdBrand);
             }
+
+            await InvalidateProductsCacheAsync();
+
             return StatusCode(StatusCodes.Status201Created, createdBrand.value);
         }
 
@@ -89,6 +93,9 @@ namespace ECommerce.Presentation.Controllers
             {
                 return HandleResult<TypeDto>(createdType);
             }
+
+            await InvalidateProductsCacheAsync();
+
             return StatusCode(StatusCodes.Status201Created, createdType.value);
         }
 
@@ -105,7 +112,71 @@ namespace ECommerce.Presentation.Controllers
                 return HandleResult<ProductDto>(createdProduct);
             }
 
+            await InvalidateProductsCacheAsync();
+
             return StatusCode(StatusCodes.Status201Created, createdProduct.value);
+        }
+
+
+        // -------------------------------------------------------------------
+        //  DELETES  (Admin / SuperAdmin only)
+        // -------------------------------------------------------------------
+
+        /// <summary>Deletes a product by its id. Invalidates cached listings.</summary>
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> DeleteProductAsync(int id)
+        {
+            var result = await service.DeleteProductAsync(id);
+            if (!result.isSuccess)
+                return HandleResult<bool>(result);
+
+            await InvalidateProductsCacheAsync();
+            return NoContent();
+        }
+
+        /// <summary>Deletes a brand. Blocks if any products still reference the brand.</summary>
+        [HttpDelete("brands/{id}")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> DeleteBrandAsync(int id)
+        {
+            var result = await service.DeleteBrandAsync(id);
+            if (!result.isSuccess)
+                return HandleResult<bool>(result);
+
+            await InvalidateProductsCacheAsync();
+            return NoContent();
+        }
+
+        /// <summary>Deletes a product type. Blocks if any products still reference the type.</summary>
+        [HttpDelete("types/{id}")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> DeleteTypeAsync(int id)
+        {
+            var result = await service.DeleteTypeAsync(id);
+            if (!result.isSuccess)
+                return HandleResult<bool>(result);
+
+            await InvalidateProductsCacheAsync();
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Evicts every cached product / brand / type listing across all users.
+        /// The RedisCacheAttribute appends "|user-{email}" and query string parts to each key,
+        /// so we must use pattern matching to clear every variant at once.
+        /// </summary>
+        private async Task InvalidateProductsCacheAsync()
+        {
+            var cache = HttpContext.RequestServices.GetRequiredService<ICacheService>();
+            try
+            {
+                await cache.RemoveByPatternAsync("/api/Products*");
+            }
+            catch
+            {
+                // cache eviction failures must never break the write
+            }
         }
     }
 }

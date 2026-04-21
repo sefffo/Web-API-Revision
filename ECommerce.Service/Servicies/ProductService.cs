@@ -177,5 +177,73 @@ namespace ECommerce.Services.Services
             //if (mappedProduct == null) return null;
             return mappedProduct;
         }
+
+        // ---------------------------------------------------------------------
+        // Deletions — Admin / SuperAdmin only (enforced at controller layer)
+        // ---------------------------------------------------------------------
+
+        public async Task<Result<bool>> DeleteProductAsync(int id)
+        {
+            var repo = unitOfWork.GetRepository<Product, int>();
+
+            var product = await repo.GetByIdAsync(id);
+            if (product is null)
+                return Error.NotFound("Product.NotFound", $"Product with id {id} was not found.");
+
+            repo.Remove(product);
+            var affected = await unitOfWork.SaveChangesAsync();
+            if (affected == 0)
+                return Error.InternalServerError("Product.DeleteFailed", "Could not delete the product.");
+
+            return Result<bool>.Ok(true);
+        }
+
+        public async Task<Result<bool>> DeleteBrandAsync(int id)
+        {
+            var brandRepo = unitOfWork.GetRepository<ProductBrand, int>();
+            var productRepo = unitOfWork.GetRepository<Product, int>();
+
+            var brand = await brandRepo.GetByIdAsync(id);
+            if (brand is null)
+                return Error.NotFound("Brand.NotFound", $"Brand with id {id} was not found.");
+
+            // Block deletion if products still reference this brand — prevents a noisy FK exception
+            // and gives the UI a clean, actionable message.
+            var referencingProducts = await productRepo.CountAsync(new ProductByBrandSpecification(id));
+            if (referencingProducts > 0)
+                return Error.BadRequest(
+                    "Brand.InUse",
+                    $"Cannot delete brand '{brand.Name}' — {referencingProducts} product(s) still reference it. Reassign or delete those products first.");
+
+            brandRepo.Remove(brand);
+            var affected = await unitOfWork.SaveChangesAsync();
+            if (affected == 0)
+                return Error.InternalServerError("Brand.DeleteFailed", "Could not delete the brand.");
+
+            return Result<bool>.Ok(true);
+        }
+
+        public async Task<Result<bool>> DeleteTypeAsync(int id)
+        {
+            var typeRepo = unitOfWork.GetRepository<ProductType, int>();
+            var productRepo = unitOfWork.GetRepository<Product, int>();
+
+            var type = await typeRepo.GetByIdAsync(id);
+            if (type is null)
+                return Error.NotFound("Type.NotFound", $"Product type with id {id} was not found.");
+
+            var referencingProducts = await productRepo.CountAsync(new ProductByTypeSpecification(id));
+            if (referencingProducts > 0)
+                return Error.BadRequest(
+                    "Type.InUse",
+                    $"Cannot delete type '{type.Name}' — {referencingProducts} product(s) still reference it. Reassign or delete those products first.");
+
+            typeRepo.Remove(type);
+            var affected = await unitOfWork.SaveChangesAsync();
+            if (affected == 0)
+                return Error.InternalServerError("Type.DeleteFailed", "Could not delete the product type.");
+
+            return Result<bool>.Ok(true);
+        }
     }
 }
